@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+.react-router
+coverage
+*.lock
+
+# BMAD framework files (not project source)
+_bmad/
+_bmad-output/
+.github/prompts/
+docs/
+prd.md

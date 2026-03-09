@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# React Router
+.react-router
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Coverage
+coverage
+
+# OS
+.DS_Store
+
+# Editor
+.vscode
+*.swp
