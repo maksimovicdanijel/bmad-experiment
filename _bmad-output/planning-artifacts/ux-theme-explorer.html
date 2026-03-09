@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bmad-experiment — UX Theme Explorer</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+        background: #f0f0f0;
+        padding: 32px 24px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 40px;
+      }
+      .themes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 32px;
+      }
+      .theme-card {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+      }
+      .theme-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 10px 20px 0;
+        opacity: 0.5;
+      }
+      .theme-name {
+        font-size: 18px;
+        font-weight: 700;
+        padding: 2px 20px 16px;
+      }
+      .app-chrome {
+        padding: 0 16px 20px;
+      }
+      .app-header {
+        padding: 16px 0 12px;
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid;
+        margin-bottom: 16px;
+      }
+      .input-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .task-input {
+        flex: 1;
+        border: 1.5px solid;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+      }
+      .add-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid;
+      }
+      .task-item:last-child {
+        border-bottom: none;
+      }
+      .checkbox {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .checkbox.checked::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: block;
+      }
+      .task-text {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .task-text.done {
+        text-decoration: line-through;
+        opacity: 0.4;
+      }
+      .task-meta {
+        font-size: 11px;
+        opacity: 0.4;
+      }
+      .delete-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        opacity: 0.3;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 28px 0;
+        font-size: 14px;
+        opacity: 0.4;
+      }
+      .error-bar {
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .retry-btn {
+        border: none;
+        border-radius: 5px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .loading-bar {
+        height: 3px;
+        border-radius: 2px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .loading-bar-inner {
+        height: 100%;
+        width: 40%;
+        border-radius: 2px;
+        animation: shimmer 1.2s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .swatches {
+        display: flex;
+        gap: 8px;
+        padding: 12px 20px 16px;
+        flex-wrap: wrap;
+      }
+      .swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+      }
+      .swatch-label {
+        font-size: 10px;
+        text-align: center;
+        margin-top: 3px;
+        color: #888;
+      }
+      .swatch-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .selected-indicator {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 6px 20px 0;
+        color: #22c55e;
+        display: none;
+      }
+      .theme-card.selected .selected-indicator {
+        display: block;
+      }
+      .theme-card {
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .theme-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 28px rgba(0, 0, 0, 0.14);
+      }
+      .theme-card.selected {
+        box-shadow:
+          0 0 0 3px #22c55e,
+          0 6px 28px rgba(0, 0, 0, 0.14);
+      }
+      .your-pick {
+        margin-top: 40px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 24px;
+        font-size: 15px;
+        color: #444;
+        border: 1.5px solid #e5e5e5;
+      }
+      .your-pick strong {
+        color: #111;
+      }
+      .typography-section {
+        padding: 0 20px 20px;
+      }
+      .type-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.4;
+        margin-bottom: 4px;
+      }
+      .type-sample-h {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      .type-sample-b {
+        font-size: 13px;
+        line-height: 1.5;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>bmad-experiment — Color Theme Explorer</h1>
+    <p class="subtitle">
+      Click a theme to select it. Share your pick with the UX designer.
+    </p>
+
+    <div class="themes">
+      <!-- THEME 1: Slate Clean -->
+      <div
+        class="theme-card"
+        onclick="select(this, 'Slate Clean')"
+        style="background: #ffffff"
+      >
+        <div class="selected-indicator">✓ Selected</div>
+        <div class="theme-label" style="color: #64748b">Theme 1</div>
+        <div class="theme-name" style="color: #0f172a">Slate Clean</div>
+        <div class="swatches">
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #0f172a"></div>
+            <div class="swatch-label">Base</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #3b82f6"></div>
+            <div class="swatch-label">Primary</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #f1f5f9"></div>
+            <div class="swatch-label">Surface</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #22c55e"></div>
+            <div class="swatch-label">Success</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #ef4444"></div>
+            <div class="swatch-label">Error</div>
+          </div>
+        </div>
+        <div
+          class="app-chrome"
+          style="background: #f1f5f9; border-radius: 12px; margin: 0 12px 12px"
+        >
+          <div class="app-header" style="color: #0f172a; border-color: #e2e8f0">
+            My Tasks
+          </div>
+          <div class="loading-bar">
+            <div class="loading-bar-inner" style="background: #3b82f6"></div>
+          </div>
+          <div class="input-row">
+            <input
+              class="task-input"
+              placeholder="Add a task…"
+              style="background: #fff; border-color: #cbd5e1; color: #0f172a"
+              readonly
+            />
+            <button class="add-btn" style="background: #3b82f6; color: #fff">
+              Add
+            </button>
+          </div>
+          <div class="task-item" style="border-color: #e2e8f0">
+            <div class="checkbox" style="border-color: #3b82f6"></div>
+            <div>
+              <div class="task-text" style="color: #0f172a">
+                Review project brief
+              </div>
+              <div class="task-meta" style="color: #64748b">Today, 9:14 AM</div>
+            </div>
+            <button class="delete-btn" style="color: #64748b">✕</button>
+          </div>
+          <div class="task-item" style="border-color: #e2e8f0">
+            <div
+              class="checkbox checked"
+              style="border-color: #22c55e; background: #22c55e"
+            >
+              <div
+                style="
+                  background: #fff;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 50%;
+                "
+              ></div>
+            </div>
+            <div>
+              <div class="task-text done" style="color: #0f172a">
+                Set up repo
+              </div>
+              <div class="task-meta" style="color: #64748b">Yesterday</div>
+            </div>
+            <button class="delete-btn" style="color: #64748b">✕</button>
+          </div>
+          <div class="error-bar" style="background: #fef2f2; color: #b91c1c">
+            ⚠ Could not save.
+            <button
+              class="retry-btn"
+              style="background: #fee2e2; color: #b91c1c"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <div class="typography-section">
+          <div class="type-label" style="color: #0f172a">Typography feel</div>
+          <div
+            class="type-sample-h"
+            style="
+              color: #0f172a;
+              font-family:
+                -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                sans-serif;
+            "
+          >
+            Clean, system-native
+          </div>
+          <div class="type-sample-b" style="color: #0f172a">
+            Familiar, fast, and invisible — the type gets out of the way.
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 2: Charcoal Focus -->
+      <div
+        class="theme-card"
+        onclick="select(this, 'Charcoal Focus')"
+        style="background: #18181b"
+      >
+        <div class="selected-indicator">✓ Selected</div>
+        <div class="theme-label" style="color: #71717a">Theme 2</div>
+        <div class="theme-name" style="color: #fafafa">Charcoal Focus</div>
+        <div class="swatches">
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #fafafa"></div>
+            <div class="swatch-label" style="color: #71717a">Base</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #a78bfa"></div>
+            <div class="swatch-label" style="color: #71717a">Primary</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #27272a"></div>
+            <div class="swatch-label" style="color: #71717a">Surface</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #4ade80"></div>
+            <div class="swatch-label" style="color: #71717a">Success</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #f87171"></div>
+            <div class="swatch-label" style="color: #71717a">Error</div>
+          </div>
+        </div>
+        <div
+          class="app-chrome"
+          style="background: #27272a; border-radius: 12px; margin: 0 12px 12px"
+        >
+          <div class="app-header" style="color: #fafafa; border-color: #3f3f46">
+            My Tasks
+          </div>
+          <div class="loading-bar">
+            <div class="loading-bar-inner" style="background: #a78bfa"></div>
+          </div>
+          <div class="input-row">
+            <input
+              class="task-input"
+              placeholder="Add a task…"
+              style="background: #18181b; border-color: #3f3f46; color: #fafafa"
+              readonly
+            />
+            <button class="add-btn" style="background: #a78bfa; color: #18181b">
+              Add
+            </button>
+          </div>
+          <div class="task-item" style="border-color: #3f3f46">
+            <div class="checkbox" style="border-color: #a78bfa"></div>
+            <div>
+              <div class="task-text" style="color: #fafafa">
+                Review project brief
+              </div>
+              <div class="task-meta" style="color: #71717a">Today, 9:14 AM</div>
+            </div>
+            <button class="delete-btn" style="color: #71717a">✕</button>
+          </div>
+          <div class="task-item" style="border-color: #3f3f46">
+            <div
+              class="checkbox checked"
+              style="border-color: #4ade80; background: #4ade80"
+            >
+              <div
+                style="
+                  background: #27272a;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 50%;
+                "
+              ></div>
+            </div>
+            <div>
+              <div class="task-text done" style="color: #fafafa">
+                Set up repo
+              </div>
+              <div class="task-meta" style="color: #71717a">Yesterday</div>
+            </div>
+            <button class="delete-btn" style="color: #71717a">✕</button>
+          </div>
+          <div class="error-bar" style="background: #2d1515; color: #f87171">
+            ⚠ Could not save.
+            <button
+              class="retry-btn"
+              style="background: #3f1818; color: #f87171"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <div class="typography-section">
+          <div class="type-label" style="color: #71717a">Typography feel</div>
+          <div
+            class="type-sample-h"
+            style="
+              color: #fafafa;
+              font-family:
+                -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                sans-serif;
+            "
+          >
+            Dark, focused, Linear-like
+          </div>
+          <div class="type-sample-b" style="color: #a1a1aa">
+            Low distraction, deep focus. Inspired by developer tools.
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 3: Warm Minimal -->
+      <div
+        class="theme-card"
+        onclick="select(this, 'Warm Minimal')"
+        style="background: #fafaf8"
+      >
+        <div class="selected-indicator">✓ Selected</div>
+        <div class="theme-label" style="color: #a8a29e">Theme 3</div>
+        <div class="theme-name" style="color: #1c1917">Warm Minimal</div>
+        <div class="swatches">
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #1c1917"></div>
+            <div class="swatch-label">Base</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #f97316"></div>
+            <div class="swatch-label">Primary</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #f5f5f4"></div>
+            <div class="swatch-label">Surface</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #16a34a"></div>
+            <div class="swatch-label">Success</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #dc2626"></div>
+            <div class="swatch-label">Error</div>
+          </div>
+        </div>
+        <div
+          class="app-chrome"
+          style="background: #f5f5f4; border-radius: 12px; margin: 0 12px 12px"
+        >
+          <div class="app-header" style="color: #1c1917; border-color: #e7e5e4">
+            My Tasks
+          </div>
+          <div class="loading-bar">
+            <div class="loading-bar-inner" style="background: #f97316"></div>
+          </div>
+          <div class="input-row">
+            <input
+              class="task-input"
+              placeholder="Add a task…"
+              style="background: #fff; border-color: #d6d3d1; color: #1c1917"
+              readonly
+            />
+            <button class="add-btn" style="background: #f97316; color: #fff">
+              Add
+            </button>
+          </div>
+          <div class="task-item" style="border-color: #e7e5e4">
+            <div class="checkbox" style="border-color: #f97316"></div>
+            <div>
+              <div class="task-text" style="color: #1c1917">
+                Review project brief
+              </div>
+              <div class="task-meta" style="color: #a8a29e">Today, 9:14 AM</div>
+            </div>
+            <button class="delete-btn" style="color: #a8a29e">✕</button>
+          </div>
+          <div class="task-item" style="border-color: #e7e5e4">
+            <div
+              class="checkbox checked"
+              style="border-color: #16a34a; background: #16a34a"
+            >
+              <div
+                style="
+                  background: #fff;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 50%;
+                "
+              ></div>
+            </div>
+            <div>
+              <div class="task-text done" style="color: #1c1917">
+                Set up repo
+              </div>
+              <div class="task-meta" style="color: #a8a29e">Yesterday</div>
+            </div>
+            <button class="delete-btn" style="color: #a8a29e">✕</button>
+          </div>
+          <div class="error-bar" style="background: #fff7ed; color: #c2410c">
+            ⚠ Could not save.
+            <button
+              class="retry-btn"
+              style="background: #fed7aa; color: #c2410c"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <div class="typography-section">
+          <div class="type-label" style="color: #1c1917">Typography feel</div>
+          <div
+            class="type-sample-h"
+            style="
+              color: #1c1917;
+              font-family: Georgia, &quot;Times New Roman&quot;, serif;
+            "
+          >
+            Warm, human, approachable
+          </div>
+          <div class="type-sample-b" style="color: #57534e">
+            Feels personal and friendly — less tool, more notebook.
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 4: Ink & Space -->
+      <div
+        class="theme-card"
+        onclick="select(this, 'Ink & Space')"
+        style="background: #fff"
+      >
+        <div class="selected-indicator">✓ Selected</div>
+        <div class="theme-label" style="color: #9ca3af">Theme 4</div>
+        <div class="theme-name" style="color: #111827">Ink & Space</div>
+        <div class="swatches">
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #111827"></div>
+            <div class="swatch-label">Base</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #111827"></div>
+            <div class="swatch-label">Primary</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #f9fafb"></div>
+            <div class="swatch-label">Surface</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #111827"></div>
+            <div class="swatch-label">Success</div>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" style="background: #6b7280"></div>
+            <div class="swatch-label">Muted</div>
+          </div>
+        </div>
+        <div
+          class="app-chrome"
+          style="background: #f9fafb; border-radius: 12px; margin: 0 12px 12px"
+        >
+          <div class="app-header" style="color: #111827; border-color: #e5e7eb">
+            My Tasks
+          </div>
+          <div class="loading-bar">
+            <div class="loading-bar-inner" style="background: #111827"></div>
+          </div>
+          <div class="input-row">
+            <input
+              class="task-input"
+              placeholder="Add a task…"
+              style="background: #fff; border-color: #d1d5db; color: #111827"
+              readonly
+            />
+            <button class="add-btn" style="background: #111827; color: #fff">
+              Add
+            </button>
+          </div>
+          <div class="task-item" style="border-color: #e5e7eb">
+            <div class="checkbox" style="border-color: #111827"></div>
+            <div>
+              <div class="task-text" style="color: #111827">
+                Review project brief
+              </div>
+              <div class="task-meta" style="color: #9ca3af">Today, 9:14 AM</div>
+            </div>
+            <button class="delete-btn" style="color: #9ca3af">✕</button>
+          </div>
+          <div class="task-item" style="border-color: #e5e7eb">
+            <div
+              class="checkbox checked"
+              style="border-color: #111827; background: #111827"
+            >
+              <div
+                style="
+                  background: #fff;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 50%;
+                "
+              ></div>
+            </div>
+            <div>
+              <div class="task-text done" style="color: #111827">
+                Set up repo
+              </div>
+              <div class="task-meta" style="color: #9ca3af">Yesterday</div>
+            </div>
+            <button class="delete-btn" style="color: #9ca3af">✕</button>
+          </div>
+          <div
+            class="error-bar"
+            style="
+              background: #f3f4f6;
+              color: #374151;
+              border: 1px solid #d1d5db;
+            "
+          >
+            ⚠ Could not save.
+            <button
+              class="retry-btn"
+              style="background: #e5e7eb; color: #374151"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <div class="typography-section">
+          <div class="type-label" style="color: #111827">Typography feel</div>
+          <div
+            class="type-sample-h"
+            style="
+              color: #111827;
+              font-family:
+                -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+                sans-serif;
+            "
+          >
+            Monochromatic, ultra-minimal
+          </div>
+          <div class="type-sample-b" style="color: #6b7280">
+            Pure black and white. Content is the only color. Max clarity.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="your-pick" id="pickDisplay">
+      <strong>Your pick:</strong> Click a theme above to select it.
+    </div>
+
+    <script>
+      function select(card, name) {
+        document
+          .querySelectorAll(".theme-card")
+          .forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        document.getElementById("pickDisplay").innerHTML =
+          "<strong>Your pick:</strong> Theme — <strong>" +
+          name +
+          "</strong>. Let your UX designer know this is your choice!";
+      }
+    </script>
+  </body>
+</html>

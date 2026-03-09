@@ -1,0 +1,1134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bmad-experiment — Design Directions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #18181b;
+        --surface: #27272a;
+        --border: #3f3f46;
+        --text: #fafafa;
+        --muted: #71717a;
+        --dim: #52525b;
+        --primary: #a78bfa;
+        --success: #4ade80;
+        --error: #f87171;
+        --err-bg: #2d1515;
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: #09090b;
+        color: var(--text);
+        padding: 0 0 80px;
+      }
+
+      /* ── Page header ── */
+      .page-header {
+        padding: 32px 32px 24px;
+        border-bottom: 1px solid #27272a;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .page-header h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .page-header p {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .pill {
+        background: #27272a;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--primary);
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+
+      /* ── Nav tabs ── */
+      .tabs {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        border-bottom: 1px solid #27272a;
+        padding: 0 32px;
+        scrollbar-width: none;
+      }
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .tab {
+        padding: 14px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.active {
+        color: var(--text);
+        border-bottom-color: var(--primary);
+      }
+
+      /* ── Mockup panels ── */
+      .panel {
+        display: none;
+        padding: 32px;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      .panel-meta {
+        margin-bottom: 24px;
+      }
+      .panel-meta h2 {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .panel-meta p {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 560px;
+        line-height: 1.5;
+      }
+
+      .mockup-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+        gap: 24px;
+        justify-content: start;
+      }
+
+      /* ── App frame ── */
+      .frame {
+        background: var(--bg);
+        border-radius: 14px;
+        border: 1.5px solid var(--border);
+        overflow: hidden;
+        cursor: pointer;
+        transition:
+          border-color 0.14s,
+          box-shadow 0.14s,
+          transform 0.14s;
+      }
+      .frame:hover {
+        border-color: #71717a;
+        transform: translateY(-1px);
+      }
+      .frame.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px #a78bfa44;
+      }
+      .frame-label {
+        padding: 10px 14px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .sel-badge {
+        background: var(--primary);
+        color: #18181b;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        display: none;
+      }
+      .frame.selected .sel-badge {
+        display: block;
+      }
+
+      /* ── Shared app components ── */
+      .app-shell {
+        padding: 18px;
+      }
+
+      .app-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .app-subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .inp {
+        flex: 1;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--text);
+        font-family: inherit;
+        outline: none;
+      }
+      .inp::placeholder {
+        color: var(--dim);
+      }
+      .btn-add {
+        background: var(--primary);
+        color: #18181b;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .btn-icon {
+        background: var(--primary);
+        color: #18181b;
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        font-weight: 400;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .task {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .task:last-child {
+        border-bottom: none;
+      }
+      .cbx {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid var(--primary);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cbx.done {
+        background: var(--success);
+        border-color: var(--success);
+      }
+      .cbx.done::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #27272a;
+      }
+      .task-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .task-txt {
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.4;
+      }
+      .task-txt.done {
+        text-decoration: line-through;
+        color: var(--dim);
+      }
+      .task-ts {
+        font-size: 11px;
+        color: var(--dim);
+        margin-top: 1px;
+      }
+      .del-btn {
+        background: none;
+        border: none;
+        color: var(--border);
+        font-size: 14px;
+        cursor: pointer;
+        padding: 2px 4px;
+        flex-shrink: 0;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 28px 0;
+        font-size: 13px;
+        color: var(--dim);
+        line-height: 1.6;
+      }
+      .empty strong {
+        display: block;
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      .error-bar {
+        background: var(--err-bg);
+        border-radius: 7px;
+        padding: 9px 12px;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--error);
+      }
+      .retry {
+        background: #3f1515;
+        border: none;
+        border-radius: 5px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--error);
+        cursor: pointer;
+      }
+
+      .loading-strip {
+        height: 2px;
+        background: var(--border);
+        margin-bottom: 14px;
+        border-radius: 1px;
+        overflow: hidden;
+      }
+      .loading-fill {
+        height: 100%;
+        width: 45%;
+        background: var(--primary);
+        border-radius: 1px;
+        animation: shimmer 1.2s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 14px 0;
+      }
+
+      /* ── Direction-specific styles ── */
+
+      /* D1: Classic Card */
+      .d1 .app-shell {
+        background: var(--surface);
+        border-radius: 10px;
+        margin: 12px;
+      }
+
+      /* D2: Full-width minimal */
+      .d2 .app-shell {
+        padding: 20px;
+      }
+      .d2 .task {
+        padding: 11px 0;
+      }
+
+      /* D3: Header-bar layout */
+      .d3 .topbar {
+        background: var(--surface);
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+      }
+      .d3 .topbar-title {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .d3 .topbar-count {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .d3 .body {
+        padding: 16px 18px;
+      }
+      .d3 .inp-bar {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 12px 16px;
+        position: sticky;
+        bottom: 0;
+      }
+
+      /* D4: Split sections */
+      .d4 .section-head {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 14px 0 8px;
+      }
+
+      /* D5: Sidebar hint */
+      .d5 .layout {
+        display: flex;
+        gap: 0;
+      }
+      .d5 .sidebar {
+        width: 40px;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 0;
+        gap: 18px;
+        flex-shrink: 0;
+      }
+      .d5 .sidebar-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: var(--border);
+      }
+      .d5 .sidebar-icon.active {
+        background: var(--primary);
+      }
+      .d5 .main {
+        flex: 1;
+        padding: 16px;
+        overflow: hidden;
+      }
+
+      /* D6: Floating input */
+      .d6-wrap {
+        position: relative;
+      }
+      .d6 .app-shell {
+        padding: 18px 18px 70px;
+      }
+      .d6 .floating-input {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 10px 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border);
+      }
+      .d6 .floating-input .inp {
+        background: transparent;
+        border: none;
+        padding: 0;
+        font-size: 13px;
+      }
+
+      /* ── Footer ── */
+      .pick-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #18181b;
+        border-top: 1px solid #27272a;
+        padding: 14px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        z-index: 100;
+      }
+      .pick-label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .pick-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <div>
+        <h1>Design Directions — bmad-experiment</h1>
+        <p>
+          6 layout explorations using Charcoal Focus · Inter · Comfortable
+          spacing. Click any variant to select it.
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <span class="pill">Charcoal Focus</span>
+        <span class="pill">Inter</span>
+        <span class="pill">Comfortable</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab(0)">D1 · Classic Card</div>
+      <div class="tab" onclick="showTab(1)">D2 · Full-Width Minimal</div>
+      <div class="tab" onclick="showTab(2)">D3 · Header + Sticky Input</div>
+      <div class="tab" onclick="showTab(3)">D4 · Split Active / Done</div>
+      <div class="tab" onclick="showTab(4)">D5 · Sidebar Hint</div>
+      <div class="tab" onclick="showTab(5)">D6 · Floating Input</div>
+    </div>
+
+    <!-- ═══ D1: Classic Card ═══ -->
+    <div class="panel active" id="p0">
+      <div class="panel-meta">
+        <h2>D1 · Classic Card</h2>
+        <p>
+          Centred content card on the dark background. Task list lives inside a
+          raised surface. Clean separation of app chrome from page background.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d1" onclick="selectFrame(this, 'D1 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell" style="padding: 0">
+            <div style="padding: 18px 18px 0">
+              <div class="app-title">My Tasks</div>
+              <div class="app-subtitle">3 tasks · 1 completed</div>
+            </div>
+            <div style="padding: 14px 18px 18px">
+              <div class="input-row">
+                <input class="inp" placeholder="Add a task…" readonly />
+                <button class="btn-add">Add</button>
+              </div>
+              <div class="task-list">
+                <div class="task">
+                  <div class="cbx"></div>
+                  <div class="task-body">
+                    <div class="task-txt">Review project brief</div>
+                    <div class="task-ts">Today, 9:14 AM</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+                <div class="task">
+                  <div class="cbx"></div>
+                  <div class="task-body">
+                    <div class="task-txt">Write first story</div>
+                    <div class="task-ts">Today, 10:02 AM</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+                <div class="task">
+                  <div class="cbx done"></div>
+                  <div class="task-body">
+                    <div class="task-txt done">Set up repository</div>
+                    <div class="task-ts">Yesterday</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame d1" onclick="selectFrame(this, 'D1 · Empty state')">
+          <div class="frame-label">
+            Empty state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell" style="padding: 0">
+            <div style="padding: 18px 18px 0">
+              <div class="app-title">My Tasks</div>
+              <div class="app-subtitle">Nothing here yet</div>
+            </div>
+            <div style="padding: 14px 18px 18px">
+              <div class="input-row">
+                <input class="inp" placeholder="Add a task…" readonly />
+                <button class="btn-add">Add</button>
+              </div>
+              <div class="empty">
+                <strong>All clear</strong>Type a task above and press Enter to
+                get started.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame d1" onclick="selectFrame(this, 'D1 · Error state')">
+          <div class="frame-label">
+            Error state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell" style="padding: 0">
+            <div style="padding: 18px 18px 0">
+              <div class="app-title">My Tasks</div>
+              <div class="app-subtitle">2 tasks</div>
+            </div>
+            <div style="padding: 14px 18px 18px">
+              <div class="input-row">
+                <input class="inp" placeholder="Add a task…" readonly />
+                <button class="btn-add">Add</button>
+              </div>
+              <div class="task-list">
+                <div class="task">
+                  <div class="cbx"></div>
+                  <div class="task-body">
+                    <div class="task-txt">Review project brief</div>
+                    <div class="task-ts">Today</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+              </div>
+              <div class="error-bar">
+                ⚠ Could not save. <button class="retry">Retry</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ D2: Full-Width Minimal ═══ -->
+    <div class="panel" id="p1">
+      <div class="panel-meta">
+        <h2>D2 · Full-Width Minimal</h2>
+        <p>
+          No cards. Tasks sit directly on the app background. Maximum
+          whitespace, ultra-minimal chrome. Input and list share the same
+          surface.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d2" onclick="selectFrame(this, 'D2 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell">
+            <div class="app-title" style="margin-bottom: 2px">My Tasks</div>
+            <div class="app-subtitle">3 tasks</div>
+            <div class="loading-strip"><div class="loading-fill"></div></div>
+            <div class="input-row">
+              <input
+                class="inp"
+                placeholder="What needs to be done?"
+                readonly
+              />
+              <button class="btn-add">Add</button>
+            </div>
+            <hr class="divider" />
+            <div class="task-list">
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Review project brief</div>
+                  <div class="task-ts">9:14 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Write first story</div>
+                  <div class="task-ts">10:02 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Set up repository</div>
+                  <div class="task-ts">Yesterday</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame d2" onclick="selectFrame(this, 'D2 · Empty state')">
+          <div class="frame-label">
+            Empty state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell">
+            <div class="app-title" style="margin-bottom: 2px">My Tasks</div>
+            <div class="app-subtitle">Start by adding your first task</div>
+            <div style="height: 14px"></div>
+            <div class="input-row">
+              <input
+                class="inp"
+                placeholder="What needs to be done?"
+                readonly
+              />
+              <button class="btn-add">Add</button>
+            </div>
+            <hr class="divider" />
+            <div class="empty">
+              <strong>Nothing to do yet</strong>Add your first task above.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ D3: Header + Sticky Input ═══ -->
+    <div class="panel" id="p2">
+      <div class="panel-meta">
+        <h2>D3 · Header Bar + Sticky Input</h2>
+        <p>
+          Fixed top bar with title and task count. Task list scrolls freely.
+          Input bar is pinned to the bottom — always accessible. Mobile-first
+          feel.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d3" onclick="selectFrame(this, 'D3 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="topbar">
+            <span class="topbar-title">My Tasks</span
+            ><span class="topbar-count">3 tasks</span>
+          </div>
+          <div class="body">
+            <div class="task-list">
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Review project brief</div>
+                  <div class="task-ts">Today, 9:14 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Write first story</div>
+                  <div class="task-ts">Today, 10:02 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Set up repository</div>
+                  <div class="task-ts">Yesterday</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="inp-bar">
+            <div class="input-row" style="margin-bottom: 0">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button class="btn-icon">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame d3" onclick="selectFrame(this, 'D3 · Loading state')">
+          <div class="frame-label">
+            Loading state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="topbar">
+            <span class="topbar-title">My Tasks</span
+            ><span class="topbar-count" style="color: var(--primary)"
+              >Loading…</span
+            >
+          </div>
+          <div class="body">
+            <div class="loading-strip"><div class="loading-fill"></div></div>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                opacity: 0.3;
+              "
+            >
+              <div
+                style="
+                  height: 38px;
+                  background: var(--surface);
+                  border-radius: 6px;
+                "
+              ></div>
+              <div
+                style="
+                  height: 38px;
+                  background: var(--surface);
+                  border-radius: 6px;
+                "
+              ></div>
+              <div
+                style="
+                  height: 38px;
+                  background: var(--surface);
+                  border-radius: 6px;
+                "
+              ></div>
+            </div>
+          </div>
+          <div class="inp-bar">
+            <div class="input-row" style="margin-bottom: 0">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button class="btn-icon">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ D4: Split Active / Done ═══ -->
+    <div class="panel" id="p3">
+      <div class="panel-meta">
+        <h2>D4 · Split Active / Done</h2>
+        <p>
+          Tasks separated into two named sections: active tasks on top,
+          completed below. Clear visual hierarchy shows progress at a glance.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d4" onclick="selectFrame(this, 'D4 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell">
+            <div class="app-title" style="margin-bottom: 14px">My Tasks</div>
+            <div class="input-row">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button class="btn-add">Add</button>
+            </div>
+            <div class="section-head">Active — 2</div>
+            <div class="task-list">
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Review project brief</div>
+                  <div class="task-ts">9:14 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx"></div>
+                <div class="task-body">
+                  <div class="task-txt">Write first story</div>
+                  <div class="task-ts">10:02 AM</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+            </div>
+            <div class="section-head" style="margin-top: 16px">
+              Completed — 1
+            </div>
+            <div class="task-list">
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Set up repository</div>
+                  <div class="task-ts">Yesterday</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="frame d4"
+          onclick="selectFrame(this, 'D4 · All complete state')"
+        >
+          <div class="frame-label">
+            All complete <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="app-shell">
+            <div class="app-title" style="margin-bottom: 14px">My Tasks</div>
+            <div class="input-row">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button class="btn-add">Add</button>
+            </div>
+            <div class="empty" style="margin-bottom: 12px">
+              <strong>All done! 🎉</strong>Add a new task when you're ready.
+            </div>
+            <div class="section-head">Completed — 3</div>
+            <div class="task-list">
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Review project brief</div>
+                  <div class="task-ts">Today</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Write first story</div>
+                  <div class="task-ts">Today</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+              <div class="task">
+                <div class="cbx done"></div>
+                <div class="task-body">
+                  <div class="task-txt done">Set up repository</div>
+                  <div class="task-ts">Yesterday</div>
+                </div>
+                <button class="del-btn">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ D5: Sidebar Hint ═══ -->
+    <div class="panel" id="p4">
+      <div class="panel-meta">
+        <h2>D5 · Sidebar Hint</h2>
+        <p>
+          Minimal icon sidebar hints at future navigation extensibility. Main
+          content area is uncluttered. Suitable if auth / multi-list features
+          are on the near horizon.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d5" onclick="selectFrame(this, 'D5 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="layout">
+            <div class="sidebar">
+              <div class="sidebar-icon active"></div>
+              <div class="sidebar-icon"></div>
+              <div class="sidebar-icon"></div>
+            </div>
+            <div class="main">
+              <div
+                class="app-title"
+                style="font-size: 16px; margin-bottom: 2px"
+              >
+                My Tasks
+              </div>
+              <div class="app-subtitle">3 tasks</div>
+              <div class="input-row" style="margin-top: 12px">
+                <input
+                  class="inp"
+                  style="font-size: 12px"
+                  placeholder="Add a task…"
+                  readonly
+                />
+                <button
+                  class="btn-icon"
+                  style="width: 34px; height: 34px; font-size: 18px"
+                >
+                  +
+                </button>
+              </div>
+              <div class="task-list">
+                <div class="task" style="padding: 9px 0">
+                  <div class="cbx" style="width: 15px; height: 15px"></div>
+                  <div class="task-body">
+                    <div class="task-txt" style="font-size: 12px">
+                      Review project brief
+                    </div>
+                    <div class="task-ts">9:14 AM</div>
+                  </div>
+                  <button class="del-btn" style="font-size: 12px">✕</button>
+                </div>
+                <div class="task" style="padding: 9px 0">
+                  <div class="cbx" style="width: 15px; height: 15px"></div>
+                  <div class="task-body">
+                    <div class="task-txt" style="font-size: 12px">
+                      Write first story
+                    </div>
+                    <div class="task-ts">10:02 AM</div>
+                  </div>
+                  <button class="del-btn" style="font-size: 12px">✕</button>
+                </div>
+                <div class="task" style="padding: 9px 0">
+                  <div class="cbx done" style="width: 15px; height: 15px"></div>
+                  <div class="task-body">
+                    <div class="task-txt done" style="font-size: 12px">
+                      Set up repository
+                    </div>
+                    <div class="task-ts">Yesterday</div>
+                  </div>
+                  <button class="del-btn" style="font-size: 12px">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ D6: Floating Input ═══ -->
+    <div class="panel" id="p5">
+      <div class="panel-meta">
+        <h2>D6 · Floating Input</h2>
+        <p>
+          Input floats above the task list as an elevated action bar. The list
+          takes full focus. The input stays accessible without dominating visual
+          space.
+        </p>
+      </div>
+      <div class="mockup-grid">
+        <div class="frame d6" onclick="selectFrame(this, 'D6 · Loaded state')">
+          <div class="frame-label">
+            Loaded state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="d6-wrap">
+            <div class="app-shell">
+              <div class="app-title" style="margin-bottom: 2px">My Tasks</div>
+              <div class="app-subtitle" style="margin-bottom: 14px">
+                3 tasks
+              </div>
+              <div class="task-list">
+                <div class="task">
+                  <div class="cbx"></div>
+                  <div class="task-body">
+                    <div class="task-txt">Review project brief</div>
+                    <div class="task-ts">9:14 AM</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+                <div class="task">
+                  <div class="cbx"></div>
+                  <div class="task-body">
+                    <div class="task-txt">Write first story</div>
+                    <div class="task-ts">10:02 AM</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+                <div class="task">
+                  <div class="cbx done"></div>
+                  <div class="task-body">
+                    <div class="task-txt done">Set up repository</div>
+                    <div class="task-ts">Yesterday</div>
+                  </div>
+                  <button class="del-btn">✕</button>
+                </div>
+              </div>
+            </div>
+            <div class="floating-input">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button
+                class="btn-icon"
+                style="width: 34px; height: 34px; font-size: 18px"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame d6" onclick="selectFrame(this, 'D6 · Empty state')">
+          <div class="frame-label">
+            Empty state <span class="sel-badge">✓ Selected</span>
+          </div>
+          <div class="d6-wrap">
+            <div class="app-shell">
+              <div class="app-title" style="margin-bottom: 2px">My Tasks</div>
+              <div class="app-subtitle" style="margin-bottom: 14px">
+                Nothing yet
+              </div>
+              <div class="empty" style="margin-top: 20px">
+                <strong>Ready when you are</strong>Tap below to add your first
+                task.
+              </div>
+            </div>
+            <div class="floating-input">
+              <input class="inp" placeholder="Add a task…" readonly />
+              <button
+                class="btn-icon"
+                style="width: 34px; height: 34px; font-size: 18px"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer pick bar -->
+    <div class="pick-bar">
+      <span class="pick-label">Your selection:</span>
+      <span class="pick-value" id="pickVal"
+        >None selected — click any mockup above</span
+      >
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".tab");
+      const panels = document.querySelectorAll(".panel");
+
+      function showTab(i) {
+        tabs.forEach((t, j) => t.classList.toggle("active", i === j));
+        panels.forEach((p, j) => p.classList.toggle("active", i === j));
+      }
+
+      function selectFrame(frame, label) {
+        document
+          .querySelectorAll(".frame")
+          .forEach((f) => f.classList.remove("selected"));
+        frame.classList.add("selected");
+        document.getElementById("pickVal").textContent = label;
+      }
+    </script>
+  </body>
+</html>

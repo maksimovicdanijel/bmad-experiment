@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bmad-experiment — Typography & Spacing Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #09090b;
+        color: #fafafa;
+        font-family: Inter, sans-serif;
+        padding: 40px 24px 80px;
+        min-height: 100vh;
+      }
+
+      .page-header {
+        margin-bottom: 12px;
+      }
+      .page-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fafafa;
+        margin-bottom: 6px;
+      }
+      .page-header p {
+        font-size: 14px;
+        color: #71717a;
+        line-height: 1.5;
+      }
+
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #52525b;
+        margin: 40px 0 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      /* ── Card shell ── */
+      .card {
+        background: #18181b;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1.5px solid #27272a;
+        cursor: pointer;
+        transition:
+          transform 0.14s,
+          border-color 0.14s,
+          box-shadow 0.14s;
+        position: relative;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: #52525b;
+      }
+      .card.selected {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 2px #a78bfa55;
+      }
+      .card.selected .pick-badge {
+        display: flex;
+      }
+
+      .pick-badge {
+        display: none;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #a78bfa;
+        color: #18181b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 20px;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .card-meta {
+        padding: 16px 18px 10px;
+        border-bottom: 1px solid #27272a;
+      }
+      .card-tag {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a78bfa;
+        margin-bottom: 4px;
+      }
+      .card-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #fafafa;
+        margin-bottom: 2px;
+      }
+      .card-desc {
+        font-size: 12px;
+        color: #71717a;
+        line-height: 1.4;
+      }
+
+      /* ── App preview ── */
+      .app {
+        background: #27272a;
+        margin: 12px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      /* Dense spacing */
+      .dense .app-header {
+        padding: 12px 14px 10px;
+      }
+      .dense .input-wrap {
+        padding: 8px 10px;
+      }
+      .dense .task-item {
+        padding: 8px 14px;
+      }
+      .dense .empty-wrap {
+        padding: 20px 14px;
+      }
+      .dense .error-wrap {
+        padding: 8px 10px;
+      }
+
+      /* Comfortable spacing */
+      .comfortable .app-header {
+        padding: 18px 18px 14px;
+      }
+      .comfortable .input-wrap {
+        padding: 12px 14px;
+      }
+      .comfortable .task-item {
+        padding: 13px 18px;
+      }
+      .comfortable .empty-wrap {
+        padding: 32px 18px;
+      }
+      .comfortable .error-wrap {
+        padding: 10px 14px;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #3f3f46;
+      }
+      .app-header-title {
+        font-weight: 700;
+        color: #fafafa;
+      }
+      .app-header-count {
+        font-size: 12px;
+        color: #71717a;
+      }
+
+      .input-wrap {
+        background: #18181b;
+      }
+      .input-row {
+        display: flex;
+        gap: 8px;
+      }
+      .task-input {
+        flex: 1;
+        background: #27272a;
+        border: 1.5px solid #3f3f46;
+        border-radius: 7px;
+        color: #fafafa;
+        outline: none;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      .add-btn {
+        background: #a78bfa;
+        color: #18181b;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .task-list {
+        background: #27272a;
+      }
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-top: 1px solid #3f3f46;
+      }
+      .task-item:first-child {
+        border-top: none;
+      }
+
+      .checkbox {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid #a78bfa;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .checkbox.done {
+        background: #4ade80;
+        border-color: #4ade80;
+      }
+      .checkbox.done::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #27272a;
+      }
+
+      .task-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .task-text {
+        color: #fafafa;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .task-text.done {
+        text-decoration: line-through;
+        color: #52525b;
+      }
+      .task-time {
+        color: #52525b;
+        margin-top: 1px;
+      }
+      .del {
+        background: none;
+        border: none;
+        color: #3f3f46;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+      .del:hover {
+        color: #71717a;
+      }
+
+      .error-wrap {
+        background: #18181b;
+        border-top: 1px solid #3f3f46;
+      }
+      .error-row {
+        background: #2d1515;
+        border-radius: 7px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        color: #f87171;
+      }
+      .retry {
+        background: #3f1515;
+        border: none;
+        border-radius: 5px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #f87171;
+        cursor: pointer;
+      }
+
+      /* ── Font families ── */
+      .font-inter {
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      .font-dm-sans {
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+      .font-mono-ui .app-header-title,
+      .font-mono-ui .task-text,
+      .font-mono-ui .task-input {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .font-mono-ui .add-btn,
+      .font-mono-ui .card-title,
+      .font-mono-ui .app-header-count,
+      .font-mono-ui .task-time,
+      .font-mono-ui .error-row {
+        font-family: "Inter", sans-serif;
+      }
+
+      /* dense sizes */
+      .dense .app-header-title {
+        font-size: 15px;
+      }
+      .dense .task-text {
+        font-size: 13px;
+      }
+      .dense .task-time {
+        font-size: 11px;
+      }
+      .dense .app-header-count {
+        font-size: 11px;
+      }
+
+      /* comfortable sizes */
+      .comfortable .app-header-title {
+        font-size: 17px;
+      }
+      .comfortable .task-text {
+        font-size: 14px;
+      }
+      .comfortable .task-time {
+        font-size: 12px;
+      }
+      .comfortable .app-header-count {
+        font-size: 12px;
+      }
+
+      /* ── Footer pick bar ── */
+      .pick-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #18181b;
+        border-top: 1px solid #27272a;
+        padding: 14px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        z-index: 100;
+      }
+      .pick-bar-label {
+        font-size: 13px;
+        color: #71717a;
+      }
+      .pick-bar-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #a78bfa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <h1>Typography & Spacing Explorer</h1>
+      <p>
+        Theme: <strong>Charcoal Focus</strong> &nbsp;·&nbsp; 6 combinations: 3
+        typefaces × 2 spacing densities &nbsp;·&nbsp; Click to select your
+        preference.
+      </p>
+    </div>
+
+    <!-- ROW 1: Inter -->
+    <div class="section-label">
+      A — Modern Sans (Inter) &nbsp;·&nbsp; System-native, precision tool,
+      Linear-like
+    </div>
+    <div class="grid">
+      <div
+        class="card font-inter dense"
+        onclick="pick(this, 'A-Dense', 'Inter · Dense')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">A · Dense</div>
+          <div class="card-title">Inter · Dense</div>
+          <div class="card-desc">
+            Efficient layout, maximum tasks visible, high focus.
+          </div>
+        </div>
+        <div class="app dense">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card font-inter comfortable"
+        onclick="pick(this, 'A-Comfortable', 'Inter · Comfortable')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">A · Comfortable</div>
+          <div class="card-title">Inter · Comfortable</div>
+          <div class="card-desc">
+            Relaxed rhythm, easier tap targets, still sharp.
+          </div>
+        </div>
+        <div class="app comfortable">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: DM Sans -->
+    <div class="section-label">
+      B — Geometric Sans (DM Sans) &nbsp;·&nbsp; Warmer, rounder, more
+      approachable
+    </div>
+    <div class="grid">
+      <div
+        class="card font-dm-sans dense"
+        onclick="pick(this, 'B-Dense', 'DM Sans · Dense')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">B · Dense</div>
+          <div class="card-title">DM Sans · Dense</div>
+          <div class="card-desc">
+            Warm geometric feel, compact. Friendly but focused.
+          </div>
+        </div>
+        <div class="app dense">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card font-dm-sans comfortable"
+        onclick="pick(this, 'B-Comfortable', 'DM Sans · Comfortable')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">B · Comfortable</div>
+          <div class="card-title">DM Sans · Comfortable</div>
+          <div class="card-desc">
+            Warm and spacious. Feels personal and readable.
+          </div>
+        </div>
+        <div class="app comfortable">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Mono tasks -->
+    <div class="section-label">
+      C — Mono Tasks (JetBrains Mono for task text, Inter for UI) &nbsp;·&nbsp;
+      Developer aesthetic, "captured note" feel
+    </div>
+    <div class="grid">
+      <div
+        class="card font-mono-ui dense"
+        onclick="pick(this, 'C-Dense', 'Mono Tasks · Dense')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">C · Dense</div>
+          <div class="card-title">Mono Tasks · Dense</div>
+          <div class="card-desc">
+            Task text in mono, compact layout. Raw and sharp.
+          </div>
+        </div>
+        <div class="app dense">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card font-mono-ui comfortable"
+        onclick="pick(this, 'C-Comfortable', 'Mono Tasks · Comfortable')"
+      >
+        <div class="pick-badge">✓ Selected</div>
+        <div class="card-meta">
+          <div class="card-tag">C · Comfortable</div>
+          <div class="card-title">Mono Tasks · Comfortable</div>
+          <div class="card-desc">
+            Mono text with generous spacing. Readable and unique.
+          </div>
+        </div>
+        <div class="app comfortable">
+          <div class="app-header">
+            <span class="app-header-title">My Tasks</span
+            ><span class="app-header-count">2 tasks</span>
+          </div>
+          <div class="input-wrap">
+            <div class="input-row">
+              <input
+                class="task-input"
+                placeholder="Add a task…"
+                readonly
+              /><button class="add-btn">Add</button>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="checkbox"></div>
+              <div class="task-body">
+                <div class="task-text">Review project brief</div>
+                <div class="task-time">Today, 9:14 AM</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+            <div class="task-item">
+              <div class="checkbox done"></div>
+              <div class="task-body">
+                <div class="task-text done">Set up repository</div>
+                <div class="task-time">Yesterday</div>
+              </div>
+              <button class="del">✕</button>
+            </div>
+          </div>
+          <div class="error-wrap">
+            <div class="error-row">
+              ⚠ Could not save. <button class="retry">Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer bar -->
+    <div class="pick-bar">
+      <span class="pick-bar-label">Your selection:</span>
+      <span class="pick-bar-value" id="pickVal"
+        >None selected — click a card above</span
+      >
+    </div>
+
+    <script>
+      function pick(card, id, label) {
+        document
+          .querySelectorAll(".card")
+          .forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        document.getElementById("pickVal").textContent = label;
+        card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    </script>
+  </body>
+</html>
