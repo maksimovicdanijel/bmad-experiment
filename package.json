@@ -19,7 +19,7 @@
     "lint": "npm run lint -ws --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate:client": "massimo generate --spec apps/api/openapi.json --output apps/web/app/lib/api.client.ts",
+    "generate:client": "massimo apps/api/openapi.json --name api.client --frontend --language ts --folder apps/web/app/lib",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -33,6 +33,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
+    "massimo-cli": "^1.2.0",
     "prettier": "^3.8.1"
   }
 }

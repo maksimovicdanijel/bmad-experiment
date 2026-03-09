@@ -6,9 +6,19 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
+import {
+  Box,
+  ChakraProvider,
+  Code,
+  Container,
+  Heading,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 
 import type { Route } from './+types/root';
 import './app.css';
+import { system } from './theme/system';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -33,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <ChakraProvider value={system}>{children}</ChakraProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -45,13 +55,21 @@ export default function App() {
   return <Outlet />;
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!';
-  let details = 'An unexpected error occurred.';
+export interface ErrorBoundaryContent {
+  message: string;
+  details: string;
+  stack?: string;
+}
+
+export function resolveErrorBoundaryContent(
+  error: unknown,
+): ErrorBoundaryContent {
+  let message = 'Something went wrong';
+  let details = 'An unexpected error occurred while rendering this page.';
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
+    message = error.status === 404 ? 'Page not found' : 'Request failed';
     details =
       error.status === 404
         ? 'The requested page could not be found.'
@@ -61,15 +79,34 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     stack = error.stack;
   }
 
+  return { message, details, stack };
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const content = resolveErrorBoundaryContent(error);
+
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <Container maxW="3xl" py={{ base: '10', md: '16' }} role="alert">
+      <VStack align="start" gap="4">
+        <Heading size="lg">{content.message}</Heading>
+        <Text color="fg.muted">{content.details}</Text>
+        {content.stack && (
+          <Box
+            as="pre"
+            width="full"
+            maxH="xs"
+            overflow="auto"
+            rounded="md"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            bg="bg.panel"
+            p="4"
+            fontSize="sm"
+          >
+            <Code whiteSpace="pre">{content.stack}</Code>
+          </Box>
+        )}
+      </VStack>
+    </Container>
   );
 }

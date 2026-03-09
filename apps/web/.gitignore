@@ -5,3 +5,8 @@
 # React Router
 /.react-router/
 /build/
+
+# Generated API client
+/app/lib/api.client.mts
+/app/lib/api.client-types.d.ts
+/app/lib/api.client.openapi.json
