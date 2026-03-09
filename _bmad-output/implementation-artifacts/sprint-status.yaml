@@ -45,7 +45,7 @@ development_status:
   1-1-initialise-monorepo-scaffold: done
   1-2-scaffold-fastify-api-with-drizzle-orm: in-progress
   1-3-scaffold-react-router-v7-ssr-web-app-with-chakra-ui: done
-  1-4-configure-test-infrastructure: backlog
+  1-4-configure-test-infrastructure: done
   1-5-containerise-applications: backlog
   epic-1-retrospective: optional
 
