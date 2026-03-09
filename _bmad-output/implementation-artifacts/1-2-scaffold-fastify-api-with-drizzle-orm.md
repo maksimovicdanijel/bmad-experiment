@@ -1,6 +1,6 @@
 # Story 1.2: Scaffold Fastify API with Drizzle ORM
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -32,51 +32,51 @@ So that route implementation can begin immediately in Epic 2 without any further
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Install new production and dev dependencies** (AC: 1, 3, 4, 8)
-  - [ ] In `apps/api`, add production deps: `drizzle-orm`, `pg`, `@neondatabase/serverless`, `@fastify/swagger`, `@fastify/swagger-ui`, `@fastify/rate-limit`, `dotenv`
-  - [ ] In `apps/api`, add dev deps: `drizzle-kit`, `@types/pg`
-  - [ ] Run `npm install` from monorepo root and confirm zero errors with correct hoisting
+- [x] **Task 1: Install new production and dev dependencies** (AC: 1, 3, 4, 8)
+  - [x] In `apps/api`, add production deps: `drizzle-orm`, `pg`, `@neondatabase/serverless`, `@fastify/swagger`, `@fastify/swagger-ui`, `@fastify/rate-limit`, `dotenv`
+  - [x] In `apps/api`, add dev deps: `drizzle-kit`, `@types/pg`
+  - [x] Run `npm install` from monorepo root and confirm zero errors with correct hoisting
 
-- [ ] **Task 2: Create Drizzle DB schema and client** (AC: 3, 4)
-  - [ ] [RED] Write failing test in `src/db/schema.test.ts`: import `todos` from `./schema.js` and assert the column names as a sanity check
-  - [ ] Create `src/db/schema.ts` — `pgTable('todos', { id: uuid PK defaultRandom, text: varchar(255) NOT NULL, isCompleted: boolean NOT NULL default false, createdAt: timestamp withTimezone mode:'string' NOT NULL defaultNow })`
-  - [ ] [GREEN] Confirm the schema test passes and `tsc --noEmit` passes with zero errors
-  - [ ] Create `src/db/index.ts` — exports a `db` Drizzle client using the node-postgres adapter (`drizzle-orm/node-postgres`), reading `DATABASE_URL` from `process.env`
+- [x] **Task 2: Create Drizzle DB schema and client** (AC: 3, 4)
+  - [x] [RED] Write failing test in `src/db/schema.test.ts`: import `todos` from `./schema.js` and assert the column names as a sanity check
+  - [x] Create `src/db/schema.ts` — `pgTable('todos', { id: uuid PK defaultRandom, text: varchar(255) NOT NULL, isCompleted: boolean NOT NULL default false, createdAt: timestamp withTimezone mode:'string' NOT NULL defaultNow })`
+  - [x] [GREEN] Confirm the schema test passes and `tsc --noEmit` passes with zero errors
+  - [x] Create `src/db/index.ts` — exports a `db` Drizzle client using the node-postgres adapter (`drizzle-orm/node-postgres`), reading `DATABASE_URL` from `process.env`
 
-- [ ] **Task 3: Configure Drizzle Kit and database migration scripts** (AC: 3)
-  - [ ] Create `drizzle.config.ts` at `apps/api/` root — `import 'dotenv/config'`, `defineConfig({ schema: './src/db/schema.ts', out: './src/db/migrations', dialect: 'postgresql', dbCredentials: { url: process.env.DATABASE_URL! } })`
-  - [ ] Add scripts to `apps/api/package.json`: `"db:generate": "drizzle-kit generate"` and `"db:migrate": "drizzle-kit migrate"`
-  - [ ] Create `apps/api/.env` (git-ignored — add to `apps/api/.gitignore` if it doesn't exist): `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bmad_experiment`
-  - [ ] Run `npm run db:generate -w apps/api` — confirm `src/db/migrations/0001_init.sql` (or similar) is created
-  - [ ] Verify migration SQL creates `todos` table with correct columns
-  - [ ] With docker-compose postgres running, run `npm run db:migrate -w apps/api` — confirm `todos` table appears in the database
+- [x] **Task 3: Configure Drizzle Kit and database migration scripts** (AC: 3)
+  - [x] Create `drizzle.config.ts` at `apps/api/` root — `import 'dotenv/config'`, `defineConfig({ schema: './src/db/schema.ts', out: './src/db/migrations', dialect: 'postgresql', dbCredentials: { url: process.env.DATABASE_URL! } })`
+  - [x] Add scripts to `apps/api/package.json`: `"db:generate": "drizzle-kit generate"` and `"db:migrate": "drizzle-kit migrate"`
+  - [x] Create `apps/api/.env` (git-ignored — add to `apps/api/.gitignore` if it doesn't exist): `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bmad_experiment`
+  - [x] Run `npm run db:generate -w apps/api` — confirm `src/db/migrations/0001_init.sql` (or similar) is created
+  - [x] Verify migration SQL creates `todos` table with correct columns
+  - [x] With docker-compose postgres running, run `npm run db:migrate -w apps/api` — confirm `todos` table appears in the database
 
-- [ ] **Task 4: Create todos domain stub files** (AC: 5)
-  - [ ] Create `src/todos/todos.schema.ts` — import Zod schemas from `@bmad/shared`; export a `createTodoJsonSchema` and `updateTodoJsonSchema` (JSON Schema objects for Fastify route validation, converted from Zod using `zod-to-json-schema`) plus a `todoJsonSchema` for response shapes
-  - [ ] Create `src/todos/todos.queries.ts` — stub module with JSDoc comment indicating it will contain Drizzle queries; no exports yet
-  - [ ] Create `src/todos/todos.service.ts` — stub module with JSDoc comment indicating it will contain business logic; no exports yet
-  - [ ] Create `src/todos/todos.routes.ts` — Fastify `FastifyPluginAsync`, no routes yet; just registers the plugin and exports `todosRoutes` as default
+- [x] **Task 4: Create todos domain stub files** (AC: 5)
+  - [x] Create `src/todos/todos.schema.ts` — import Zod schemas from `@bmad/shared`; export a `createTodoJsonSchema` and `updateTodoJsonSchema` (JSON Schema objects for Fastify route validation, converted from Zod using `zod-to-json-schema`) plus a `todoJsonSchema` for response shapes
+  - [x] Create `src/todos/todos.queries.ts` — stub module with JSDoc comment indicating it will contain Drizzle queries; no exports yet
+  - [x] Create `src/todos/todos.service.ts` — stub module with JSDoc comment indicating it will contain business logic; no exports yet
+  - [x] Create `src/todos/todos.routes.ts` — Fastify `FastifyPluginAsync`, no routes yet; just registers the plugin and exports `todosRoutes` as default
 
-- [ ] **Task 5: Update server.ts with all plugins in correct order** (AC: 1, 2, 5, 6, 7, 8, 9, 10)
-  - [ ] [RED] Write failing tests in `src/server.test.ts`: test `GET /health` → 200 `{ status: 'ok' }`, `GET /documentation/json` → 200 with `openapi: '3.0.0'` in body, security header `x-content-type-options: nosniff` present on any response
-  - [ ] Refactor `server.ts` to export `buildApp(): Promise<FastifyInstance>` instead of a raw `app` const — this enables testable server creation
-  - [ ] Register `@fastify/env` FIRST (await before other plugins); schema: `DATABASE_URL` required, `PORT` default `'3000'`, `HOST` default `'0.0.0.0'`, `CORS_ORIGIN` default `'http://localhost:5173'`, `NODE_ENV` default `'development'`
-  - [ ] Add TypeScript interface augmentation for `FastifyInstance.config` to type the env values
-  - [ ] Register `@fastify/helmet` (after env)
-  - [ ] Register `@fastify/cors` with `origin: app.config.CORS_ORIGIN`
-  - [ ] Register `@fastify/rate-limit` with `max: 1000, timeWindow: '1 minute'`
-  - [ ] Register `@fastify/swagger` with `openapi: { openapi: '3.0.0', info: { title: 'bmad-experiment API', version: '1.0.0' } }`
-  - [ ] Register `todosRoutes` with `{ prefix: '/todos' }`
-  - [ ] Register `@fastify/swagger-ui` LAST with `routePrefix: '/documentation'`
-  - [ ] Keep the existing `GET /health` route returning `{ status: 'ok' }`
-  - [ ] Update the standalone startup block to call `buildApp()` and use `app.config.PORT` and `app.config.HOST`; fix default port from 3001 to **3000**
-  - [ ] [GREEN] Confirm all three server tests pass
+- [x] **Task 5: Update server.ts with all plugins in correct order** (AC: 1, 2, 5, 6, 7, 8, 9, 10)
+  - [x] [RED] Write failing tests in `src/server.test.ts`: test `GET /health` → 200 `{ status: 'ok' }`, `GET /documentation/json` → 200 with `openapi: '3.0.0'` in body, security header `x-content-type-options: nosniff` present on any response
+  - [x] Refactor `server.ts` to export `buildApp(): Promise<FastifyInstance>` instead of a raw `app` const — this enables testable server creation
+  - [x] Register `@fastify/env` FIRST (await before other plugins); schema: `DATABASE_URL` required, `PORT` default `'3000'`, `HOST` default `'0.0.0.0'`, `CORS_ORIGIN` default `'http://localhost:5173'`, `NODE_ENV` default `'development'`
+  - [x] Add TypeScript interface augmentation for `FastifyInstance.config` to type the env values
+  - [x] Register `@fastify/helmet` (after env)
+  - [x] Register `@fastify/cors` with `origin: app.config.CORS_ORIGIN`
+  - [x] Register `@fastify/rate-limit` with `max: 1000, timeWindow: '1 minute'`
+  - [x] Register `@fastify/swagger` with `openapi: { openapi: '3.0.0', info: { title: 'bmad-experiment API', version: '1.0.0' } }`
+  - [x] Register `todosRoutes` with `{ prefix: '/todos' }`
+  - [x] Register `@fastify/swagger-ui` LAST with `routePrefix: '/documentation'`
+  - [x] Keep the existing `GET /health` route returning `{ status: 'ok' }`
+  - [x] Update the standalone startup block to call `buildApp()` and use `app.config.PORT` and `app.config.HOST`; fix default port from 3001 to **3000**
+  - [x] [GREEN] Confirm all three server tests pass
 
-- [ ] **Task 6: Run full validation** (AC: 1–10)
-  - [ ] Run `tsc --noEmit` in `apps/api` — zero TypeScript errors
-  - [ ] Run `npm run test -w apps/api` — all tests pass (schema test + server tests)
-  - [ ] Run `npm run lint -w apps/api` — zero ESLint errors
-  - [ ] With docker-compose postgres running, start `npm run dev -w apps/api` — server starts on port 3000, `GET /health` returns 200, `GET /documentation/json` returns OpenAPI JSON
+- [x] **Task 6: Run full validation** (AC: 1–10)
+  - [x] Run `tsc --noEmit` in `apps/api` — zero TypeScript errors
+  - [x] Run `npm run test -w apps/api` — all tests pass (schema test + server tests)
+  - [x] Run `npm run lint -w apps/api` — zero ESLint errors
+  - [x] With docker-compose postgres running, start `npm run dev -w apps/api` — server starts on port 3000, `GET /health` returns 200, `GET /documentation/json` returns OpenAPI JSON
 
 ## Dev Notes
 
@@ -413,16 +413,55 @@ The existing `.env.example` at root already documents `DATABASE_URL` — no upda
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Sonnet 4.6
 
 ### Debug Log References
 
+- Removed `rootDir: "./src"` from `apps/api/tsconfig.json` — the explicit `rootDir` conflicted with `@bmad/shared` path alias resolving to `../../packages/shared/src/`. TypeScript infers `rootDir` as `src/` from the `include` glob when not explicitly set, preserving the `dist/` output structure while allowing cross-workspace imports.
+- Added `"*.ts"` to `include` in `apps/api/tsconfig.json` so that `drizzle.config.ts` (at repo root level of `apps/api/`) is covered by the TypeScript project and parsed correctly by ESLint `parserOptions: { project: true }`.
+- Removed `_fastify` parameter from `todos.routes.ts` stub (TypeScript allows omitting unused callback params) to satisfy `@typescript-eslint/no-unused-vars`.
+- Migration file generated as `0000_unusual_sentinels.sql` (drizzle-kit names based on diff hash, not sequential).
+
 ### Completion Notes List
 
+- Installed all production deps: `drizzle-orm`, `pg`, `@neondatabase/serverless`, `@fastify/swagger`, `@fastify/swagger-ui`, `@fastify/rate-limit`, `dotenv`, `zod-to-json-schema`
+- Installed dev deps: `drizzle-kit`, `@types/pg`
+- Created `src/db/schema.ts` with `todos` pgTable (uuid PK, varchar text, boolean isCompleted, timestamptz createdAt)
+- Created `src/db/schema.test.ts` — TDD Red→Green verified column keys
+- Created `src/db/index.ts` — Drizzle client using `drizzle-orm/node-postgres` with `pg.Pool`
+- Created `drizzle.config.ts` — uses `dotenv/config`, targets `src/db/schema.ts`, outputs to `src/db/migrations/`
+- Added `db:generate` and `db:migrate` scripts to `apps/api/package.json`
+- Created `apps/api/.env` (git-ignored via root `.gitignore`)
+- Migration `0000_unusual_sentinels.sql` generated and applied successfully to local postgres
+- Created `src/todos/todos.schema.ts` — `createTodoJsonSchema`, `updateTodoJsonSchema` (via `zod-to-json-schema`), `todoJsonSchema`
+- Created `src/todos/todos.queries.ts` — stub with JSDoc
+- Created `src/todos/todos.service.ts` — stub with JSDoc
+- Created `src/todos/todos.routes.ts` — `FastifyPluginAsync` stub, exported as default
+- Created `src/server.test.ts` — TDD Red→Green for GET /health, GET /documentation/json, security headers
+- Refactored `server.ts` to `buildApp()` pattern with full plugin registration order per AC#10
+- Server starts on port 3000; `GET /health` → `{"status":"ok"}`; `GET /documentation/json` → valid OpenAPI 3.0 doc
+- All 4 tests pass (1 schema + 3 server); zero TypeScript errors; zero lint errors
+
 ### File List
+
+- `apps/api/package.json` — added deps + `db:generate`/`db:migrate` scripts
+- `apps/api/tsconfig.json` — removed explicit `rootDir`, added `*.ts` to include
+- `apps/api/drizzle.config.ts` — new: Drizzle Kit config
+- `apps/api/.env` — new (git-ignored): local DATABASE_URL
+- `apps/api/src/server.ts` — refactored: `buildApp()` pattern, all plugins in correct order, port 3000
+- `apps/api/src/server.test.ts` — new: integration tests (health, OpenAPI, security headers)
+- `apps/api/src/db/schema.ts` — new: Drizzle todos table definition
+- `apps/api/src/db/schema.test.ts` — new: schema column key sanity test
+- `apps/api/src/db/index.ts` — new: Drizzle node-postgres client
+- `apps/api/src/db/migrations/0000_unusual_sentinels.sql` — new: initial todos table migration
+- `apps/api/src/todos/todos.schema.ts` — new: Zod→JSON Schema conversions for Fastify
+- `apps/api/src/todos/todos.queries.ts` — new: stub (to be implemented in Story 2.1)
+- `apps/api/src/todos/todos.service.ts` — new: stub (to be implemented in Story 2.1)
+- `apps/api/src/todos/todos.routes.ts` — new: Fastify plugin stub with `/todos` prefix
 
 ## Change Log
 
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-03-09 | Story created | create-story workflow |
+| 2026-03-09 | Story implemented: Fastify v5 + Drizzle ORM scaffold with all plugins, todos domain stubs, migrations, and full test coverage | dev agent (Claude Sonnet 4.6) |
