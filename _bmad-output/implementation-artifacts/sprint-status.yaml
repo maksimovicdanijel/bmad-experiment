@@ -43,7 +43,7 @@ development_status:
   # ─── Epic 1: Monorepo Foundation & Production-Ready Skeleton ───────────────
   epic-1: in-progress
   1-1-initialise-monorepo-scaffold: done
-  1-2-scaffold-fastify-api-with-drizzle-orm: backlog
+  1-2-scaffold-fastify-api-with-drizzle-orm: ready-for-dev
   1-3-scaffold-react-router-v7-ssr-web-app-with-chakra-ui: backlog
   1-4-configure-test-infrastructure: backlog
   1-5-containerise-applications: backlog
