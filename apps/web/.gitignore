@@ -10,3 +10,6 @@
 /app/lib/api.client.mts
 /app/lib/api.client-types.d.ts
 /app/lib/api.client.openapi.json
+/app/lib/api-client/api.client.mts
+/app/lib/api-client/api.client-types.d.ts
+/app/lib/api-client/api.client.openapi.json

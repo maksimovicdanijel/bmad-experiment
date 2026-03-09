@@ -32,7 +32,8 @@ export default function Home() {
           </List.Item>
           <List.Item>Root error boundary is SSR-safe and accessible.</List.Item>
           <List.Item>
-            API client generation outputs are emitted to apps/web/app/lib.
+            API client generation outputs are emitted to
+            apps/web/app/lib/api-client.
           </List.Item>
         </List.Root>
       </Box>

@@ -19,7 +19,7 @@
     "lint": "npm run lint -ws --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate:client": "massimo apps/api/openapi.json --name api.client --frontend --language ts --folder apps/web/app/lib",
+    "generate:client": "massimo apps/api/openapi.json --name api.client --frontend --language ts --folder apps/web/app/lib/api-client",
     "prepare": "husky"
   },
   "devDependencies": {

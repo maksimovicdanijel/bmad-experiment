@@ -1,6 +1,6 @@
 # Story 1.3: Scaffold React Router v7 SSR Web App with Chakra UI
 
-Status: review
+Status: done
 
 ## Story
 
@@ -12,7 +12,7 @@ so that frontend component implementation can begin immediately in Epic 2 withou
 
 1. **Given** the API is running, **When** `npm run dev -w apps/web` is executed, **Then** the RR v7 Node dev server starts and the app loads in a browser at `localhost:5173` with no console errors.
 2. **Given** Chakra UI v3 is installed and `ChakraProvider` wraps the app root in `root.tsx`, **When** the app renders, **Then** the Charcoal Focus dark theme is applied, `colorMode` is forced to `dark`, and `prefers-reduced-motion` is respected via Chakra's built-in handling.
-3. **Given** `apps/api/openapi.json` has been exported from the API build, **When** `npm run generate:client` is run from the root, **Then** Massimo-generated client artifacts are produced in `apps/web/app/lib` without errors and the output type-checks cleanly.
+3. **Given** `apps/api/openapi.json` has been exported from the API build, **When** `npm run generate:client` is run from the root, **Then** Massimo-generated client artifacts are produced in `apps/web/app/lib/api-client` without errors and the output type-checks cleanly.
 4. **Given** `root.tsx` exports an `ErrorBoundary` component, **When** a route throws an unhandled error, **Then** the `ErrorBoundary` renders an error message instead of a blank screen or crash.
 5. **Given** `react-router.config.ts` is configured with the `@react-router/node` adapter, **When** `npm run build -w apps/web` is run, **Then** it produces a Node.js server bundle without TypeScript or build errors.
 
@@ -37,7 +37,7 @@ so that frontend component implementation can begin immediately in Epic 2 withou
 - [x] **Task 4: Prepare generated API client integration path** (AC: 3)
   - [x] Create `apps/web/app/lib/` directory if missing.
   - [x] Add or confirm ignore rule strategy for generated output artifacts.
-  - [x] Run `npm run generate:client` from repo root and verify Massimo output files at `apps/web/app/lib/`.
+  - [x] Run `npm run generate:client` from repo root and verify Massimo output files at `apps/web/app/lib/api-client/`.
   - [x] Confirm generated client compiles with `npm run typecheck -w apps/web`.
 
 - [x] **Task 5: Validate dev/build/runtime behavior** (AC: 1, 5)
@@ -85,9 +85,9 @@ Expected files to add/update in this story:
   - `apps/web/app/theme/system.ts` (new)
   - `apps/web/app/theme/tokens.ts` (new, optional if split preferred)
 - `apps/web/app/lib/` (new folder; generated artifacts destination)
-  - `apps/web/app/lib/api.client.mts` (generated)
-  - `apps/web/app/lib/api.client-types.d.ts` (generated)
-  - `apps/web/app/lib/api.client.openapi.json` (generated)
+  - `apps/web/app/lib/api-client/api.client.mts` (generated)
+  - `apps/web/app/lib/api-client/api.client-types.d.ts` (generated)
+  - `apps/web/app/lib/api-client/api.client.openapi.json` (generated)
 - `apps/web/package.json` (update dependencies/scripts only if required)
 - `apps/web/README.md` (optional update to replace Tailwind-first messaging with Chakra usage)
 
@@ -171,6 +171,7 @@ GPT-5.3-Codex
 - Added OpenAPI export script in API app and wired robust root `generate:client` flow.
 - Switched client generation to pure Massimo output artifacts (no custom fallback script).
 - Validated typecheck, lint, tests, build, and dev startup using Node 24 runtime.
+- Code review follow-up: unified generated client output to `apps/web/app/lib/api-client` and aligned ignore rules/documentation.
 
 ### File List
 
@@ -183,6 +184,9 @@ GPT-5.3-Codex
 - apps/web/app/root.test.tsx
 - apps/web/app/root.tsx
 - apps/web/app/routes/home.tsx
+- apps/web/app/lib/api-client/api.client-types.d.ts
+- apps/web/app/lib/api-client/api.client.mts
+- apps/web/app/lib/api-client/api.client.openapi.json
 - apps/web/app/theme/system.ts
 - apps/web/app/theme/tokens.ts
 - apps/web/package.json
@@ -192,9 +196,18 @@ GPT-5.3-Codex
 ### Change Log
 
 - 2026-03-09: Implemented Story 1.3 web scaffold (Chakra dark theme, SSR shell integration, ErrorBoundary hardening, OpenAPI export + client generation flow, and validation gates).
+- 2026-03-09: Code review remediation — resolved Massimo output path drift by standardising generation at `apps/web/app/lib/api-client` and syncing related docs/ignore rules.
+
+## Senior Developer Review (AI)
+
+- Outcome: Changes Requested items addressed.
+- High issues: 0
+- Medium issues: 0
+- Low issues remaining: 0
+- Notes: Story documentation and implementation are now aligned on a single Massimo output path (`apps/web/app/lib/api-client`), and generated artifact ignore rules cover both legacy and standardised locations.
 
 ## Story Completion Status
 
 ✅ Story implementation completed for all defined tasks/subtasks.
 ✅ Acceptance criteria validated through build/test/typecheck/lint/dev-start checks.
-✅ Story status set to `review`.
+✅ Story status set to `done`.
