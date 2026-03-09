@@ -1,6 +1,6 @@
 # Story 1.2: Scaffold Fastify API with Drizzle ORM
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -459,9 +459,40 @@ Claude Sonnet 4.6
 - `apps/api/src/todos/todos.service.ts` — new: stub (to be implemented in Story 2.1)
 - `apps/api/src/todos/todos.routes.ts` — new: Fastify plugin stub with `/todos` prefix
 
+## Senior Developer Review (AI)
+
+### Review Date
+
+2026-03-09
+
+### Reviewer
+
+Danijel (AI Code Review)
+
+### Outcome
+
+Changes Requested
+
+### Summary
+
+The implementation is broadly solid, but one acceptance criterion is not reliably satisfied in local development (`DATABASE_URL` missing behavior depends on dotenv loading), and documentation/test coverage gaps were found.
+
+### Action Items
+
+- [ ] [HIGH] AC #6 behavior is environment-dependent because `dotenv: true` can satisfy required `DATABASE_URL` from `.env`; ensure startup fails when `DATABASE_URL` is not explicitly set in the target runtime context.
+- [ ] [MEDIUM] Update Story File List to include committed migration meta files and lockfile changes (`apps/api/src/db/migrations/meta/0000_snapshot.json`, `apps/api/src/db/migrations/meta/_journal.json`, `package-lock.json`).
+- [ ] [MEDIUM] Remove `apps/api/.env` from story File List as a changed tracked artifact (git-ignored, not committed).
+- [ ] [MEDIUM] Add automated tests for AC #8 (rate-limit 429 behavior) and AC #9 (CORS header behavior).
+- [ ] [LOW] Remove unused dependency `@fastify/sensible` from `apps/api/package.json` or register/use it intentionally.
+
+### Notes
+
+Per user instruction, no automatic fixes or follow-up task insertion under Tasks/Subtasks were performed in this review pass.
+
 ## Change Log
 
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-03-09 | Story created | create-story workflow |
 | 2026-03-09 | Story implemented: Fastify v5 + Drizzle ORM scaffold with all plugins, todos domain stubs, migrations, and full test coverage | dev agent (Claude Sonnet 4.6) |
+| 2026-03-09 | Code review completed; issues identified, no fixes applied per user instruction; status moved back to in-progress | code-review workflow |
