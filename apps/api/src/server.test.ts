@@ -4,11 +4,6 @@ import fastify from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { buildApp } from './server.js';
 
-// Ensure DATABASE_URL is set before @fastify/env validates it
-process.env.DATABASE_URL =
-  process.env.DATABASE_URL ??
-  'postgresql://postgres:postgres@localhost:5432/bmad_experiment';
-
 let app: FastifyInstance;
 
 beforeAll(async () => {
@@ -24,7 +19,7 @@ describe('GET /health', () => {
   it('returns 200 with { status: "ok" }', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' });
     expect(res.statusCode).toBe(200);
-    expect(JSON.parse(res.body)).toEqual({ status: 'ok' });
+    expect(res.json()).toEqual({ status: 'ok' });
   });
 });
 
@@ -32,7 +27,7 @@ describe('GET /documentation/json', () => {
   it('returns a valid OpenAPI 3.0 document', async () => {
     const res = await app.inject({ method: 'GET', url: '/documentation/json' });
     expect(res.statusCode).toBe(200);
-    const body = JSON.parse(res.body);
+    const body = res.json();
     expect(body.openapi).toBe('3.0.0');
     expect(body.info.title).toBe('bmad-experiment API');
   });
@@ -90,7 +85,7 @@ describe('Environment validation (AC #6)', () => {
     delete process.env.DATABASE_URL;
 
     try {
-      await expect(buildApp()).rejects.toThrow(/DATABASE_URL/);
+      await expect(buildApp({ dotenv: false })).rejects.toThrow(/DATABASE_URL/);
     } finally {
       if (previous === undefined) {
         delete process.env.DATABASE_URL;

@@ -298,6 +298,30 @@ So that the app can be built as containers and any developer can be running loca
 **When** a developer follows them from a fresh clone,
 **Then** the app is running locally in under 10 minutes (NFR-10)
 
+### Story 1.6: Configure Testcontainers for API Tests
+
+As a **developer**,
+I want API tests to automatically boot an ephemeral PostgreSQL container via testcontainers so that all contract and integration tests run against a real database with zero manual setup,
+So that tests are fully deterministic, require no external `docker compose up` step, and the DB layer is never mocked.
+
+**Acceptance Criteria:**
+
+**Given** `testcontainers` and `@testcontainers/postgresql` are installed as devDependencies in `apps/api`,
+**When** the `package.json` is inspected,
+**Then** both packages are listed under `devDependencies`
+
+**Given** `vitest.config.ts` in `apps/api` references a `globalSetup` file,
+**When** `npm run test -w apps/api` is executed without any running PostgreSQL container,
+**Then** testcontainers boots a PostgreSQL container, Drizzle migrations run against it, `DATABASE_URL` is set in `process.env`, all tests execute against the ephemeral database, and the container is torn down after tests complete
+
+**Given** all existing tests in `server.test.ts` remain unchanged (except removing the hardcoded `DATABASE_URL` fallback),
+**When** `npm run test -w apps/api` is run,
+**Then** all existing tests pass as before
+
+**Given** the testcontainers setup is complete,
+**When** `npm run test` is run from the workspace root,
+**Then** API tests pass without requiring `docker compose up -d postgres` first
+
 ---
 
 ## Epic 2: View & Capture Todos

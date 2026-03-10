@@ -1,12 +1,16 @@
+import type { Todo } from '@bmad/shared';
+import { getAllTodos } from './todos.queries.js';
+
 /**
- * todos.service.ts
- *
- * This module will contain all business logic for the todos resource.
- * Service functions will be implemented in Stories 2.1 and 2.2 when the
- * actual CRUD endpoints are built.
- *
- * All functions in this module must:
- * - Be pure TypeScript functions (no Fastify types, no Drizzle imports)
- * - Delegate all data access to todos.queries.ts
- * - Accept and return types from '@bmad/shared' (Todo, CreateTodoRequest, etc.)
+ * List all todos ordered by creation date descending.
+ * Maps DB rows to the shared Todo type.
  */
+export async function listTodos(): Promise<Todo[]> {
+  const rows = await getAllTodos();
+  return rows.map((row) => ({
+    id: row.id,
+    text: row.text,
+    isCompleted: row.isCompleted,
+    createdAt: new Date(row.createdAt).toISOString(),
+  }));
+}

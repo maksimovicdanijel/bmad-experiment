@@ -1,13 +1,11 @@
+import { desc } from 'drizzle-orm';
+import { db } from '../db/index.js';
+import { todos } from '../db/schema.js';
+import type { TodoRow } from '../db/schema.js';
+
 /**
- * todos.queries.ts
- *
- * This module will contain all Drizzle ORM queries for the todos resource.
- * Query functions will be implemented in Stories 2.1 and 2.2 when the
- * actual CRUD endpoints are built.
- *
- * All functions in this module must:
- * - Import `db` from '../db/index.js'
- * - Import `todos` schema from '../db/schema.js'
- * - Return raw DB rows (TodoRow / NewTodoRow types)
- * - Contain NO business logic — pure data access only
+ * Retrieve all todos ordered by creation date descending (newest first).
  */
+export async function getAllTodos(): Promise<TodoRow[]> {
+  return db.select().from(todos).orderBy(desc(todos.createdAt));
+}

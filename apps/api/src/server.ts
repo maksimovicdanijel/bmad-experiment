@@ -1,4 +1,4 @@
-import fastify, { type FastifyInstance } from 'fastify';
+import fastify, { type FastifyInstance, type FastifyError } from 'fastify';
 import fastifyEnv from '@fastify/env';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCors from '@fastify/cors';
@@ -34,13 +34,20 @@ declare module 'fastify' {
   }
 }
 
-export async function buildApp(): Promise<FastifyInstance> {
+interface BuildAppOptions {
+  dotenv?: boolean | { path: string };
+}
+
+export async function buildApp(
+  options: BuildAppOptions = {},
+): Promise<FastifyInstance> {
+  const { dotenv = true } = options;
   const app = fastify({ logger: true });
 
   // @fastify/env MUST be awaited first — other plugins read app.config
-  // dotenv: false ensures DATABASE_URL must be provided in the runtime environment;
-  // it must not be silently satisfied by a .env file in production/staging contexts.
-  await app.register(fastifyEnv, { schema: envSchema, dotenv: false });
+  // dotenv: true loads .env in local dev; in production/staging containers
+  // DATABASE_URL is injected via platform secrets (Fly.io, CI) and no .env exists.
+  await app.register(fastifyEnv, { schema: envSchema, dotenv });
 
   app.register(fastifyHelmet);
   app.register(fastifyCors, { origin: app.config.CORS_ORIGIN });
@@ -58,6 +65,40 @@ export async function buildApp(): Promise<FastifyInstance> {
   app.register(fastifySwaggerUi, { routePrefix: '/documentation' });
 
   app.get('/health', async () => ({ status: 'ok' }));
+
+  app.setErrorHandler<FastifyError>((error, request, reply) => {
+    // Let Fastify's built-in validation errors pass through with their status code
+    if (error.validation) {
+      return reply.status(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: error.message,
+        },
+      });
+    }
+
+    const statusCode = error.statusCode ?? 500;
+
+    // 4xx errors: preserve status code, expose error message in envelope
+    if (statusCode >= 400 && statusCode < 500) {
+      return reply.status(statusCode).send({
+        error: {
+          code: error.code ?? 'CLIENT_ERROR',
+          message: error.message,
+        },
+      });
+    }
+
+    // 5xx errors: log full error, return generic envelope — never expose internals
+    request.log.error(error);
+
+    return reply.status(500).send({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  });
 
   return app;
 }
