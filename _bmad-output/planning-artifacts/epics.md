@@ -360,39 +360,7 @@ So that the frontend loader has a reliable, contract-tested data source to rende
 **When** the response time is measured server-side,
 **Then** it responds in under 200ms at p95 (NFR-2)
 
-### Story 2.2: POST /todos API Endpoint
-
-As a **developer**,
-I want a `POST /todos` endpoint that creates a todo and returns `{ data: Todo }`,
-So that the frontend create action has a validated, contract-tested write path.
-
-**Acceptance Criteria:**
-
-**Given** a contract test exists in `todos.routes.test.ts` for the create endpoint (written before the route handler),
-**When** the test is run before implementation,
-**Then** it fails for the right reason (route not found)
-
-**Given** a valid request body `{ text: "Buy milk" }` is sent,
-**When** `POST /todos` is called,
-**Then** it returns `201` with `{ data: Todo }` where `id` is a UUID v4, `createdAt` is an ISO 8601 string, `isCompleted` is `false`, and `text` matches the input
-
-**Given** a request body with `text` of 0 characters (empty string) is sent,
-**When** `POST /todos` is called,
-**Then** it returns `400` with `{ error: { code: 'VALIDATION_ERROR', message: 'text must be between 1 and 255 characters' } }`
-
-**Given** a request body with `text` exceeding 255 characters is sent,
-**When** `POST /todos` is called,
-**Then** it returns `400` with `{ error: { code: 'VALIDATION_ERROR', message: 'text must be between 1 and 255 characters' } }`
-
-**Given** a todo is successfully created,
-**When** `GET /todos` is called immediately after,
-**Then** the new todo appears in the list (data persists — NFR-4)
-
-**Given** the route is implemented following architecture boundaries,
-**When** the code is reviewed,
-**Then** `todos.routes.ts` delegates to `todos.service.ts`, which delegates to `todos.queries.ts` — UUID generation happens in the service layer, not the route
-
-### Story 2.3: Todo List Page — Loader, Layout & Empty State
+### Story 2.2: Todo List Page — Loader, Layout & Empty State
 
 As a **user**,
 I want to open the app and immediately see my todos (or a clear empty-state prompt if none exist), with the page loading in under 1 second,
@@ -432,7 +400,67 @@ So that I can orient myself and start capturing tasks without any navigation or 
 **When** the code is reviewed,
 **Then** no hardcoded hex values, font sizes, or spacing values appear — all use Chakra theme tokens
 
-### Story 2.4: Create Todo — TaskInput Component & Action
+### Story 2.3: Playwright E2E — View Todos Journey
+
+As a **developer**,
+I want Playwright E2E tests covering UJ-2 (returning user views todos),
+So that the view slice is backed by automated end-to-end evidence running in CI.
+
+**Acceptance Criteria:**
+
+**Given** E2E test stubs for UJ-2 are written in `apps/web/e2e/todos.spec.ts` before the full stack is wired,
+**When** the tests are run against a clean environment,
+**Then** they fail for the right reason (no content yet) — TDD applies to E2E
+
+**Given** both apps and the database are running via Docker,
+**When** the Playwright suite runs against UJ-2 (returning user),
+**Then** the test navigates to the app and asserts all previously seeded todos are visible with correct text and visual styling
+
+**Given** no todos exist in the database,
+**When** the Playwright suite runs,
+**Then** the test asserts the empty state is displayed with a clear call-to-action prompt
+
+**Given** a todo exists in the database,
+**When** the page is reloaded,
+**Then** the E2E test asserts the todo is still present (data persistence — NFR-4)
+
+**Given** the E2E suite runs in CI,
+**When** the GitHub Actions `ci.yml` workflow executes,
+**Then** all UJ-2 tests pass in Chromium with zero flakes
+
+### Story 2.4: POST /todos API Endpoint
+
+As a **developer**,
+I want a `POST /todos` endpoint that creates a todo and returns `{ data: Todo }`,
+So that the frontend create action has a validated, contract-tested write path.
+
+**Acceptance Criteria:**
+
+**Given** a contract test exists in `todos.routes.test.ts` for the create endpoint (written before the route handler),
+**When** the test is run before implementation,
+**Then** it fails for the right reason (route not found)
+
+**Given** a valid request body `{ text: "Buy milk" }` is sent,
+**When** `POST /todos` is called,
+**Then** it returns `201` with `{ data: Todo }` where `id` is a UUID v4, `createdAt` is an ISO 8601 string, `isCompleted` is `false`, and `text` matches the input
+
+**Given** a request body with `text` of 0 characters (empty string) is sent,
+**When** `POST /todos` is called,
+**Then** it returns `400` with `{ error: { code: 'VALIDATION_ERROR', message: 'text must be between 1 and 255 characters' } }`
+
+**Given** a request body with `text` exceeding 255 characters is sent,
+**When** `POST /todos` is called,
+**Then** it returns `400` with `{ error: { code: 'VALIDATION_ERROR', message: 'text must be between 1 and 255 characters' } }`
+
+**Given** a todo is successfully created,
+**When** `GET /todos` is called immediately after,
+**Then** the new todo appears in the list (data persists — NFR-4)
+
+**Given** the route is implemented following architecture boundaries,
+**When** the code is reviewed,
+**Then** `todos.routes.ts` delegates to `todos.service.ts`, which delegates to `todos.queries.ts` — UUID generation happens in the service layer, not the route
+
+### Story 2.5: Create Todo — TaskInput Component & Action
 
 As a **user**,
 I want to type a task into a focused input field and submit it with Enter or a button, seeing it appear in my list immediately,
@@ -472,7 +500,31 @@ So that I can capture a task in under 2 seconds with zero friction.
 **When** its dimensions are measured,
 **Then** the touch target is at least 44×44px (NFR-7)
 
-### Story 2.5: Loading & Error States
+### Story 2.6: Playwright E2E — Create Todo Journey
+
+As a **developer**,
+I want Playwright E2E tests covering UJ-1 (first-time user creates a todo),
+So that the create slice is backed by automated end-to-end evidence running in CI.
+
+**Acceptance Criteria:**
+
+**Given** E2E test stubs for UJ-1 are written in `apps/web/e2e/todos.spec.ts` before the full stack is wired,
+**When** the tests are run against a clean environment,
+**Then** they fail for the right reason (no content yet) — TDD applies to E2E
+
+**Given** both apps and the database are running via Docker,
+**When** the Playwright suite runs against UJ-1 (first-time user),
+**Then** the test navigates to the app, sees the empty state, types a task, presses Enter, and asserts the todo appears in the list
+
+**Given** a todo is created,
+**When** the page is reloaded,
+**Then** the E2E test asserts the todo is still present (data persistence — NFR-4)
+
+**Given** the E2E suite runs in CI,
+**When** the GitHub Actions `ci.yml` workflow executes,
+**Then** all UJ-1 tests pass in Chromium with zero flakes
+
+### Story 2.7: Loading & Error States
 
 As a **user**,
 I want to see a loading indicator within 200ms when a request is in-flight and an actionable error message with a retry option when something goes wrong,
@@ -507,34 +559,6 @@ So that I always know the app is working and can recover from failures without a
 **Given** an error occurs,
 **When** `ErrorBar` renders,
 **Then** no full page reload is triggered — the app recovers in-place (NFR-5)
-
-### Story 2.6: Playwright E2E — Create & View Journeys
-
-As a **developer**,
-I want Playwright E2E tests covering UJ-1 (first-time user creates a todo) and UJ-2 (returning user views todos),
-So that acceptance of Epic 2 is backed by automated end-to-end evidence running in CI.
-
-**Acceptance Criteria:**
-
-**Given** E2E test stubs for UJ-1 and UJ-2 are written in `apps/web/e2e/todos.spec.ts` before the full stack is wired,
-**When** the tests are run against a clean environment,
-**Then** they fail for the right reason (no content yet) — TDD applies to E2E
-
-**Given** both apps and the database are running via Docker,
-**When** the Playwright suite runs against UJ-1 (first-time user),
-**Then** the test navigates to the app, sees the empty state, types a task, presses Enter, and asserts the todo appears in the list
-
-**Given** a todo was created in a previous test,
-**When** the Playwright suite runs against UJ-2 (returning user),
-**Then** the test navigates to the app and asserts all previously created todos are visible with correct text and visual styling
-
-**Given** a todo is created,
-**When** the page is reloaded,
-**Then** the E2E test asserts the todo is still present (data persistence — NFR-4)
-
-**Given** the E2E suite runs in CI,
-**When** the GitHub Actions `ci.yml` workflow executes,
-**Then** all UJ-1 and UJ-2 tests pass in Chromium with zero flakes
 
 ---
 
