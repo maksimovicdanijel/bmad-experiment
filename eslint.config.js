@@ -13,6 +13,7 @@ export default [
       '**/.react-router/**',
       '**/coverage/**',
       '**/build/**',
+      '**/api-client/**',
     ],
   },
   // All TypeScript files — shared rules

@@ -53,7 +53,7 @@ development_status:
   # ─── Epic 2: View & Capture Todos ──────────────────────────────────────────
   epic-2: in-progress
   2-1-get-todos-api-endpoint: done
-  2-2-todo-list-page-loader-layout-and-empty-state: backlog
+  2-2-todo-list-page-loader-layout-and-empty-state: done
   2-3-playwright-e2e-view-todos-journey: backlog
   2-4-post-todos-api-endpoint: backlog
   2-5-create-todo-taskinput-component-and-action: backlog

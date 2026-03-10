@@ -1,41 +1,53 @@
 import type { Route } from './+types/home';
-import { Box, Container, Heading, List, Text } from '@chakra-ui/react';
+import type { Todo } from '@bmad/shared';
+import { Box, Container, List } from '@chakra-ui/react';
+import { EmptyState } from '../components/todos/empty-state/empty-state';
+import { SectionHeader } from '../components/todos/section-header/section-header';
+import { TodoItem } from '../components/todos/todo-item/todo-item';
+import { fetchTodos } from '../lib/api/index.server';
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: 'bmad-experiment' },
-    {
-      name: 'description',
-      content: 'React Router SSR scaffold with Chakra UI',
-    },
-  ];
+export async function loader({}: Route.LoaderArgs) {
+  const todos = await fetchTodos();
+  return { todos };
 }
 
-export default function Home() {
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const todos: Todo[] = loaderData?.todos ?? [];
+
+  const activeTodos = todos.filter((t) => !t.isCompleted);
+  const completedTodos = todos.filter((t) => t.isCompleted);
+
   return (
-    <Container maxW="4xl" py={{ base: '12', md: '16' }}>
-      <Box
-        rounded="lg"
-        borderWidth="1px"
-        borderColor="border.subtle"
-        bg="bg.panel"
-        p={{ base: '6', md: '8' }}
-      >
-        <Heading size="lg">bmad-experiment web scaffold</Heading>
-        <Text mt="3" color="fg.muted">
-          React Router v7 SSR is active and Chakra UI v3 is now wired as the
-          application UI system.
-        </Text>
-        <List.Root mt="6" gap="2" color="fg.default">
-          <List.Item>
-            Dark-only Charcoal Focus theme foundation is active.
-          </List.Item>
-          <List.Item>Root error boundary is SSR-safe and accessible.</List.Item>
-          <List.Item>
-            API client generation outputs are emitted to
-            apps/web/app/lib/api-client.
-          </List.Item>
+    <Container
+      maxW="640px"
+      px={{ base: '4', md: '6', lg: '8' }}
+      py={{ base: '6', md: '10' }}
+    >
+      <title>bmad-experiment</title>
+      <meta name="description" content="Capture and manage your daily tasks" />
+
+      {/* TaskInput will go here in Story 2.5 */}
+
+      <SectionHeader label="ACTIVE" count={activeTodos.length} />
+      {activeTodos.length === 0 ? (
+        <EmptyState variant={todos.length === 0 ? 'first-use' : 'all-done'} />
+      ) : (
+        <List.Root as="ul" listStyle="none" gap="0">
+          {activeTodos.map((todo) => (
+            <TodoItem key={todo.id} todo={todo} />
+          ))}
         </List.Root>
+      )}
+
+      <Box mt="6">
+        <SectionHeader label="COMPLETED" count={completedTodos.length} />
+        {completedTodos.length > 0 && (
+          <List.Root as="ul" listStyle="none" gap="0">
+            {completedTodos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} />
+            ))}
+          </List.Root>
+        )}
       </Box>
     </Container>
   );
