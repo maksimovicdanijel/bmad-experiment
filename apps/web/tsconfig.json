@@ -13,8 +13,7 @@
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"],
-      "@bmad/shared": ["../../packages/shared/src/index.ts"]
+      "~/*": ["./app/*"]
     },
     "noEmit": true
   }

@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "openapi:export": "tsx src/export-openapi.ts",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "lint": "eslint .",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
@@ -19,7 +19,6 @@
     "@fastify/env": "^5.0.3",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
-    "@fastify/sensible": "^6.0.4",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "@neondatabase/serverless": "^1.0.2",
@@ -27,6 +26,7 @@
     "drizzle-orm": "^0.45.1",
     "fastify": "^5.8.2",
     "pg": "^8.20.0",
+    "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {

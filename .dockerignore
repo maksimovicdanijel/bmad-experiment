@@ -1,0 +1,14 @@
+node_modules
+.git
+_bmad
+_bmad-output
+docs
+**/coverage
+**/test-results
+**/.react-router
+**/vendor
+.husky
+.vscode
+*.md
+!README.md
+!**/README.md

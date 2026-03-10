@@ -1,6 +1,6 @@
 # Story 1.2: Scaffold Fastify API with Drizzle ORM
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -442,22 +442,35 @@ Claude Sonnet 4.6
 - Server starts on port 3000; `GET /health` → `{"status":"ok"}`; `GET /documentation/json` → valid OpenAPI 3.0 doc
 - All 4 tests pass (1 schema + 3 server); zero TypeScript errors; zero lint errors
 
+### Review Follow-up Completion Notes
+
+- ✅ Resolved review finding [HIGH]: Changed `dotenv: true` → `dotenv: false` in `@fastify/env` registration in `server.ts`. This ensures `DATABASE_URL` MUST be set in the runtime environment; the local `.env` file is loaded only by `drizzle.config.ts` (via `import 'dotenv/config'`) for migration CLI commands, not by the application server itself.
+- ✅ Resolved review finding [MEDIUM]: Updated File List — added `apps/api/src/db/migrations/meta/0000_snapshot.json`, `apps/api/src/db/migrations/meta/_journal.json`, `package-lock.json`; removed `apps/api/.env` (git-ignored).
+- ✅ Resolved review finding [MEDIUM]: Added AC #8 test (rate-limit 429) using a dedicated in-process Fastify instance with `max: 3` to avoid 1001 inject calls; added AC #9 tests (CORS header on regular request and OPTIONS preflight). All new tests pass (8 total).
+- ✅ Resolved review finding [LOW]: Removed `@fastify/sensible` from `apps/api/package.json` (was installed but never imported or registered).
+- ✅ Resolved review finding [HIGH]: `npm run lint -w apps/api` now passes by excluding vendored source trees from ESLint scope (`**/vendor/**`) in root config.
+- ✅ Resolved review finding [MEDIUM]: Added explicit AC #6 regression test to assert startup fails when `DATABASE_URL` is missing.
+- ✅ Resolved review finding [MEDIUM]: Strengthened AC #8 coverage by asserting real app configuration default (`RATE_LIMIT_MAX=1000`) and retaining deterministic 429 behavior test.
+
 ### File List
 
-- `apps/api/package.json` — added deps + `db:generate`/`db:migrate` scripts
+- `eslint.config.js` — updated: ignore `**/vendor/**` so lint targets project source, not vendored mirrors
+- `apps/api/package.json` — added deps + `db:generate`/`db:migrate` scripts; removed `@fastify/sensible`
 - `apps/api/tsconfig.json` — removed explicit `rootDir`, added `*.ts` to include
 - `apps/api/drizzle.config.ts` — new: Drizzle Kit config
-- `apps/api/.env` — new (git-ignored): local DATABASE_URL
-- `apps/api/src/server.ts` — refactored: `buildApp()` pattern, all plugins in correct order, port 3000
-- `apps/api/src/server.test.ts` — new: integration tests (health, OpenAPI, security headers)
+- `apps/api/src/server.ts` — refactored: `buildApp()` pattern, all plugins in correct order, port 3000, `dotenv: false` for `@fastify/env`, configurable `RATE_LIMIT_MAX` (default `1000`)
+- `apps/api/src/server.test.ts` — new: integration tests (health, OpenAPI, security headers, AC #6 env validation, AC #8 rate-limit config + 429 behavior, CORS headers)
 - `apps/api/src/db/schema.ts` — new: Drizzle todos table definition
 - `apps/api/src/db/schema.test.ts` — new: schema column key sanity test
 - `apps/api/src/db/index.ts` — new: Drizzle node-postgres client
 - `apps/api/src/db/migrations/0000_unusual_sentinels.sql` — new: initial todos table migration
+- `apps/api/src/db/migrations/meta/0000_snapshot.json` — new: drizzle-kit migration snapshot
+- `apps/api/src/db/migrations/meta/_journal.json` — new: drizzle-kit migration journal
 - `apps/api/src/todos/todos.schema.ts` — new: Zod→JSON Schema conversions for Fastify
 - `apps/api/src/todos/todos.queries.ts` — new: stub (to be implemented in Story 2.1)
 - `apps/api/src/todos/todos.service.ts` — new: stub (to be implemented in Story 2.1)
 - `apps/api/src/todos/todos.routes.ts` — new: Fastify plugin stub with `/todos` prefix
+- `package-lock.json` — updated: new/removed dependencies
 
 ## Senior Developer Review (AI)
 
@@ -479,15 +492,31 @@ The implementation is broadly solid, but one acceptance criterion is not reliabl
 
 ### Action Items
 
-- [ ] [HIGH] AC #6 behavior is environment-dependent because `dotenv: true` can satisfy required `DATABASE_URL` from `.env`; ensure startup fails when `DATABASE_URL` is not explicitly set in the target runtime context.
-- [ ] [MEDIUM] Update Story File List to include committed migration meta files and lockfile changes (`apps/api/src/db/migrations/meta/0000_snapshot.json`, `apps/api/src/db/migrations/meta/_journal.json`, `package-lock.json`).
-- [ ] [MEDIUM] Remove `apps/api/.env` from story File List as a changed tracked artifact (git-ignored, not committed).
-- [ ] [MEDIUM] Add automated tests for AC #8 (rate-limit 429 behavior) and AC #9 (CORS header behavior).
-- [ ] [LOW] Remove unused dependency `@fastify/sensible` from `apps/api/package.json` or register/use it intentionally.
+- [x] [HIGH] AC #6 behavior is environment-dependent because `dotenv: true` can satisfy required `DATABASE_URL` from `.env`; ensure startup fails when `DATABASE_URL` is not explicitly set in the target runtime context.
+- [x] [MEDIUM] Update Story File List to include committed migration meta files and lockfile changes (`apps/api/src/db/migrations/meta/0000_snapshot.json`, `apps/api/src/db/migrations/meta/_journal.json`, `package-lock.json`).
+- [x] [MEDIUM] Remove `apps/api/.env` from story File List as a changed tracked artifact (git-ignored, not committed).
+- [x] [MEDIUM] Add automated tests for AC #8 (rate-limit 429 behavior) and AC #9 (CORS header behavior).
+- [x] [LOW] Remove unused dependency `@fastify/sensible` from `apps/api/package.json` or register/use it intentionally.
 
 ### Notes
 
 Per user instruction, no automatic fixes or follow-up task insertion under Tasks/Subtasks were performed in this review pass.
+
+### Follow-up Review Date
+
+2026-03-10
+
+### Follow-up Reviewer
+
+Danijel (AI Code Review)
+
+### Follow-up Outcome
+
+Approve
+
+### Follow-up Summary
+
+All previously identified HIGH and MEDIUM findings are now resolved. Story claims and executable validation are aligned for Story 1.2.
 
 ## Change Log
 
@@ -496,3 +525,5 @@ Per user instruction, no automatic fixes or follow-up task insertion under Tasks
 | 2026-03-09 | Story created | create-story workflow |
 | 2026-03-09 | Story implemented: Fastify v5 + Drizzle ORM scaffold with all plugins, todos domain stubs, migrations, and full test coverage | dev agent (Claude Sonnet 4.6) |
 | 2026-03-09 | Code review completed; issues identified, no fixes applied per user instruction; status moved back to in-progress | code-review workflow |
+| 2026-03-10 | Addressed code review findings — 5 items resolved: dotenv:false for env-strict AC#6, File List corrected, AC#8 rate-limit test added, AC#9 CORS tests added, @fastify/sensible removed (Date: 2026-03-10) | dev agent (Claude Sonnet 4.6) |
+| 2026-03-10 | Follow-up review fixes applied: lint scope corrected for vendor trees, AC#6 missing-env test added, AC#8 configuration assertion added; story approved and moved to done | code-review workflow |

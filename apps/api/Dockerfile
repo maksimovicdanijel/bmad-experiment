@@ -14,9 +14,9 @@ WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY tsconfig.base.json ./
 COPY packages/shared/ ./packages/shared/
-COPY apps/web/ ./apps/web/
+COPY apps/api/ ./apps/api/
 
-WORKDIR /app/apps/web
+WORKDIR /app/apps/api
 RUN npm run build
 
 FROM node:24-alpine AS runtime
@@ -30,8 +30,8 @@ COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/src/ ./packages/shared/src/
 RUN npm ci --omit=dev --ignore-scripts
 
-COPY --from=build /app/apps/web/build ./apps/web/build
+COPY --from=build /app/apps/api/dist ./apps/api/dist
 
-WORKDIR /app/apps/web
+WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/src/server.js"]

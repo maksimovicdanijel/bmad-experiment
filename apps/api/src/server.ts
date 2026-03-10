@@ -15,6 +15,7 @@ const envSchema = {
     PORT: { type: 'string', default: '3000' },
     HOST: { type: 'string', default: '0.0.0.0' },
     CORS_ORIGIN: { type: 'string', default: 'http://localhost:5173' },
+    RATE_LIMIT_MAX: { type: 'string', default: '1000' },
     NODE_ENV: { type: 'string', default: 'development' },
   },
 };
@@ -27,6 +28,7 @@ declare module 'fastify' {
       PORT: string;
       HOST: string;
       CORS_ORIGIN: string;
+      RATE_LIMIT_MAX: string;
       NODE_ENV: string;
     };
   }
@@ -36,11 +38,16 @@ export async function buildApp(): Promise<FastifyInstance> {
   const app = fastify({ logger: true });
 
   // @fastify/env MUST be awaited first — other plugins read app.config
-  await app.register(fastifyEnv, { schema: envSchema, dotenv: true });
+  // dotenv: false ensures DATABASE_URL must be provided in the runtime environment;
+  // it must not be silently satisfied by a .env file in production/staging contexts.
+  await app.register(fastifyEnv, { schema: envSchema, dotenv: false });
 
   app.register(fastifyHelmet);
   app.register(fastifyCors, { origin: app.config.CORS_ORIGIN });
-  app.register(fastifyRateLimit, { max: 1000, timeWindow: '1 minute' });
+  app.register(fastifyRateLimit, {
+    max: Number(app.config.RATE_LIMIT_MAX),
+    timeWindow: '1 minute',
+  });
   app.register(fastifySwagger, {
     openapi: {
       openapi: '3.0.0',
