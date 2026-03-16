@@ -111,9 +111,9 @@ Establish the complete project scaffold — npm workspaces monorepo, shared type
 
 ### Epic 2: View & Capture Todos
 
-Users can open the application, immediately see a focused task input field, type a todo and submit it with Enter or the add button, and see it appear in the list instantly. The list shows all todos with their text and creation timestamps. If no todos exist, a clear empty-state prompt invites the first entry. Loading indicators appear within 200ms. Errors display inline with a retry option. All data persists across refreshes and sessions. All NFR performance, responsive layout, touch targets, and accessibility requirements are met.
+Users can open the application, immediately see a focused task input field, type a todo and submit it with Enter or the add button, and see it appear in the list instantly. The list shows all todos with their text and creation timestamps. If no todos exist, a clear empty-state prompt invites the first entry. Loading indicators appear within 200ms. Errors display inline with a retry option. All data persists across refreshes and sessions. All NFR performance, responsive layout, touch targets, and accessibility requirements are met. Includes a tech-debt story (2.4) to reorganise the API into a feature-based directory structure with per-handler files before adding more endpoints.
 **FRs covered:** FR-1, FR-2, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12
-**NFRs covered:** NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9
+**NFRs covered:** NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-11
 
 ### Epic 3: Manage Todo Lifecycle
 
@@ -428,7 +428,59 @@ So that the view slice is backed by automated end-to-end evidence running in CI.
 **When** the GitHub Actions `ci.yml` workflow executes,
 **Then** all UJ-2 tests pass in Chromium with zero flakes
 
-### Story 2.4: POST /todos API Endpoint
+### Story 2.4: Reorganise API into Feature-Based Directory Structure
+
+As a **developer**,
+I want the API source code reorganised from `src/todos/` into `src/features/todos/` with individual handler files under a `handlers/` sub-directory and the `todos.` filename prefix removed,
+So that each feature is self-contained, each HTTP verb has its own file for independent modification, and the codebase scales cleanly as new features are added.
+
+**Acceptance Criteria:**
+
+**Given** the current directory structure has `src/todos/todos.routes.ts`, `todos.service.ts`, `todos.queries.ts`, `todos.schema.ts`, and `todos.routes.test.ts`,
+**When** the reorganisation is complete,
+**Then** the new structure is:
+```
+src/features/todos/
+  handlers/
+    get.route.ts
+  queries.ts
+  service.ts
+  schema.ts
+  routes.ts
+  routes.test.ts
+```
+
+**Given** `handlers/get.route.ts` exports a single Fastify route registration function for `GET /`,
+**When** `routes.ts` is inspected,
+**Then** it imports the handler and registers it as a Fastify plugin — acting as a barrel/aggregator for all current and future handlers
+
+**Given** `server.ts` currently imports `./todos/todos.routes.js`,
+**When** the reorganisation is complete,
+**Then** `server.ts` imports `./features/todos/routes.js` instead
+
+**Given** all relative imports within the feature files are updated (e.g. `../db/index.js` → `../../db/index.js`),
+**When** `tsc --noEmit` is run in `apps/api`,
+**Then** it compiles with zero TypeScript errors
+
+**Given** no functional changes are made (only file moves, renames, and import path updates),
+**When** `npm run test -w apps/api` is run,
+**Then** all existing tests pass with zero failures and zero test file modifications
+
+**Given** `npm run lint` is run from the workspace root,
+**When** the linter evaluates the reorganised files,
+**Then** it reports zero errors
+
+**Given** a new feature needs to be added in the future (e.g. `users`),
+**When** a developer inspects the `src/features/` directory,
+**Then** the pattern is immediately obvious: `src/features/users/handlers/`, `queries.ts`, `service.ts`, `schema.ts`, `routes.ts`
+
+**Given** the OpenAPI spec is re-exported after the reorganisation,
+**When** `openapi.json` is compared to the pre-reorganisation version,
+**Then** the spec is identical — no endpoint paths, schemas, or response shapes have changed
+
+**Note:** After this story, all subsequent API handlers (POST in story 2.5, PATCH/DELETE in Epic 3) are written directly into the `handlers/` directory — no further refactoring needed.
+
+### Story 2.5: POST /todos API Endpoint
 
 As a **developer**,
 I want a `POST /todos` endpoint that creates a todo and returns `{ data: Todo }`,
@@ -460,7 +512,7 @@ So that the frontend create action has a validated, contract-tested write path.
 **When** the code is reviewed,
 **Then** `todos.routes.ts` delegates to `todos.service.ts`, which delegates to `todos.queries.ts` — UUID generation happens in the service layer, not the route
 
-### Story 2.5: Create Todo — TaskInput Component & Action
+### Story 2.6: Create Todo — TaskInput Component & Action
 
 As a **user**,
 I want to type a task into a focused input field and submit it with Enter or a button, seeing it appear in my list immediately,
@@ -500,7 +552,7 @@ So that I can capture a task in under 2 seconds with zero friction.
 **When** its dimensions are measured,
 **Then** the touch target is at least 44×44px (NFR-7)
 
-### Story 2.6: Playwright E2E — Create Todo Journey
+### Story 2.7: Playwright E2E — Create Todo Journey
 
 As a **developer**,
 I want Playwright E2E tests covering UJ-1 (first-time user creates a todo),
@@ -524,7 +576,7 @@ So that the create slice is backed by automated end-to-end evidence running in C
 **When** the GitHub Actions `ci.yml` workflow executes,
 **Then** all UJ-1 tests pass in Chromium with zero flakes
 
-### Story 2.7: Loading & Error States
+### Story 2.8: Loading & Error States
 
 As a **user**,
 I want to see a loading indicator within 200ms when a request is in-flight and an actionable error message with a retry option when something goes wrong,
