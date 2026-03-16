@@ -412,21 +412,32 @@ So that the view slice is backed by automated end-to-end evidence running in CI.
 **When** the tests are run against a clean environment,
 **Then** they fail for the right reason (no content yet) — TDD applies to E2E
 
-**Given** both apps and the database are running via Docker,
-**When** the Playwright suite runs against UJ-2 (returning user),
-**Then** the test navigates to the app and asserts all previously seeded todos are visible with correct text and visual styling
+**Given** both apps and the database are running,
+**When** the Playwright suite runs the populated-state test,
+**Then** a `beforeEach` hook truncates the `todos` table and runs a DB seed script (inserting known todos directly via SQL/Drizzle), then calls `GET /todos` via Playwright's `request` API context to capture the API response, navigates to the app, and asserts every todo returned by the API is rendered in the UI with correct text, completion status, and visual styling
 
-**Given** no todos exist in the database,
-**When** the Playwright suite runs,
-**Then** the test asserts the empty state is displayed with a clear call-to-action prompt
+**Given** both apps and the database are running,
+**When** the Playwright suite runs the empty-state test,
+**Then** a `beforeEach` hook truncates the `todos` table (no seeding), the test navigates to the app, and asserts the `EmptyState` component is displayed with a clear call-to-action prompt (UX-4)
 
-**Given** a todo exists in the database,
+**Given** the web app is configured to call a non-existent API endpoint (e.g. wrong port or host),
+**When** the Playwright suite runs the error-state test,
+**Then** the SSR loader genuinely fails to reach the API, and the test asserts the error boundary renders an actionable error message — no test-only code is added to the API
+
+**Given** todos have been seeded via the DB seed script,
 **When** the page is reloaded,
-**Then** the E2E test asserts the todo is still present (data persistence — NFR-4)
+**Then** the E2E test asserts the todos are still present (data persistence — NFR-4)
 
 **Given** the E2E suite runs in CI,
 **When** the GitHub Actions `ci.yml` workflow executes,
 **Then** all UJ-2 tests pass in Chromium with zero flakes
+
+**Implementation Notes:**
+
+- **Test isolation:** Every test starts with a `beforeEach` that truncates the `todos` table via a direct database connection, ensuring a deterministic starting state. In a multi-user system this would be scoped to a test user; for MVP, a full table truncate is acceptable.
+- **Populated state:** After truncation, a DB seed script inserts known todos directly into the database (using Drizzle or raw SQL against the test `DATABASE_URL`). The test then fetches `GET /todos` to capture the canonical API response and asserts the UI matches — verifying rendering correctness without relying on the API write path.
+- **Empty state:** After truncation, no seeding is performed — the test navigates directly and asserts the empty-state UI.
+- **Error state:** The error-state E2E test launches the web app pointed at a non-existent API URL (e.g. `http://localhost:19999`) so the SSR loader's fetch genuinely fails. This avoids any `NODE_ENV`-gated or test-only middleware in the API — the API behaves identically in all environments.
 
 ### Story 2.4: Reorganise API into Feature-Based Directory Structure
 
