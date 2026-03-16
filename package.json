@@ -11,9 +11,9 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
-    "db:up": "sh -c 'docker-compose version >/dev/null 2>&1 && docker-compose up -d postgres || docker-compose up -d postgres'",
-    "db:down": "sh -c 'docker-compose version >/dev/null 2>&1 && docker-compose down || docker-compose down'",
-    "db:verify": "sh -c '(docker-compose version >/dev/null 2>&1 && docker-compose ps postgres && docker-compose exec -T postgres pg_isready -U postgres -h localhost -p 5432) || (docker-compose ps postgres && docker-compose exec -T postgres pg_isready -U postgres -h localhost -p 5432)'",
+    "db:up": "docker-compose up -d postgres",
+    "db:down": "docker-compose down",
+    "db:verify": "docker-compose ps postgres && docker-compose exec -T postgres pg_isready -U postgres -h localhost -p 5432",
     "db:migrate": "npm run db:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api",
     "test": "npm run test -ws --if-present",

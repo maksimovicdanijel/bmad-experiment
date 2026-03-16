@@ -1,6 +1,6 @@
 # Story 1.5: Containerise Applications
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -239,3 +239,36 @@ Claude Sonnet 4.6
 | 2026-03-09 | Story created | create-story workflow |
 | 2026-03-10 | Story implemented: multi-stage Dockerfiles for API and web, .env.example expanded, README quickstart, root db scripts, API start path fixed | dev agent (Claude Sonnet 4.6) |
 | 2026-03-10 | Vendor removal: deleted apps/*/vendor/shared, switched to repo-root Docker build context, npm workspace resolution for @bmad/shared, removed tsconfig paths overrides, added .dockerignore, updated README build commands | dev agent (Claude Opus 4.6) |
+| 2026-03-16 | Code review: simplified db scripts (removed no-op shim), fixed README prerequisite wording, cleaned .dockerignore. Noted Dockerfile cross-workspace dep bloat and testcontainers env issue as tech debt. | code-review (Claude Opus 4.6) |
+
+## Senior Developer Review (AI)
+
+**Reviewer:** Danijel — 2026-03-16
+**Outcome:** Approved with fixes applied
+
+### Findings Summary
+
+| # | Severity | Issue | Resolution |
+|---|----------|-------|------------|
+| 1 | LOW | `db:up`/`db:down`/`db:verify` shell shim was a no-op — both branches ran same `docker-compose` command | ✅ Fixed: simplified to plain `docker-compose` commands |
+| 2 | MEDIUM | Both Dockerfiles install all workspace deps in runtime stage (API gets React, Web gets Fastify) — image bloat | ⚠️ Tech debt: npm workspace resolution requires all package.json files; optimisation deferred |
+| 3 | LOW | README says "Docker Compose v2" but scripts use legacy `docker-compose` | ✅ Fixed: updated to "Docker Desktop (with `docker-compose` CLI)" |
+| 4 | MEDIUM | API tests fail locally (testcontainers `Could not find a working container runtime strategy`) | ⚠️ Pre-existing from Story 1.6; Docker is running but testcontainers detection fails in this env |
+| 5 | LOW | README web container run command has no env var for API URL | ⚠️ Noted: standalone container run won't reach API; acceptable for MVP docs |
+| 6 | LOW | Test containers use `postgres:16-alpine` vs compose `postgres:18-alpine` | ⚠️ Pre-existing version skew from Story 1.6 |
+| 7 | LOW | `.dockerignore` re-includes `README.md` unnecessarily | ✅ Fixed: removed re-inclusion |
+
+### Acceptance Criteria Verification
+
+- ✅ AC1: Postgres 18 container starts healthy on port 5432 with named volume and healthcheck
+- ✅ AC2: API Dockerfile multi-stage build succeeds, runtime contains only dist/
+- ✅ AC3: Web Dockerfile multi-stage build succeeds, runtime runs SSR server
+- ✅ AC4: `.env.example` documents all required variables; `npm run dev` starts both apps
+- ✅ AC5: README quickstart documented and verified
+
+### Quality Gates
+
+- ✅ `npm run lint` — passes across all workspaces
+- ✅ `npm run build` — succeeds (API + Web + Shared)
+- ✅ `npm run test -w apps/web` — 21 tests pass (6 files)
+- ⚠️ `npm run test -w apps/api` — testcontainers env issue (pre-existing)

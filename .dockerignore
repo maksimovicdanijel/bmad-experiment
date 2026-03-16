@@ -10,5 +10,3 @@ docs
 .husky
 .vscode
 *.md
-!README.md
-!**/README.md

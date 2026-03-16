@@ -6,7 +6,7 @@ Monorepo for a Fastify API and React Router v7 SSR web app.
 
 - Node.js 24+
 - npm 10+
-- Docker Desktop (Docker Compose v2)
+- Docker Desktop (with `docker-compose` CLI)
 
 ## Quickstart (under 10 minutes)
 
