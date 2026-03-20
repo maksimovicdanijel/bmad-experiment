@@ -1,6 +1,6 @@
 # Story 2.3: Playwright E2E — View Todos Journey
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -38,64 +38,66 @@ so that the view slice is backed by automated end-to-end evidence running in CI.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Install `pg` and create E2E database helper (AC: 2, 3, 5)
-  - [ ] Install `pg` and `@types/pg` as devDependencies in `apps/web`: `npm install -D pg @types/pg -w apps/web`
-  - [ ] Create `apps/web/e2e/helpers/db.ts` — E2E database helper module
-  - [ ] Implement `truncateTodos()` — runs `DELETE FROM todos` against the test database
-  - [ ] Implement `seedTodos(todos)` — runs parameterised `INSERT INTO todos (text, is_completed) VALUES ...` against the test database
-  - [ ] Implement `closeDbConnection()` — closes the `pg.Pool` connection for cleanup
-  - [ ] Connection uses `DATABASE_URL` env var (same as the API uses: `postgresql://postgres:postgres@localhost:5432/bmad_experiment`)
-  - [ ] Export a `TEST_TODOS` constant with known test data for deterministic assertions
+- [x] Task 1: Install `pg` and create E2E database helper (AC: 2, 3, 5)
+  - [x] Install `pg` and `@types/pg` as devDependencies in `apps/web`: `npm install -D pg @types/pg -w apps/web`
+  - [x] Create `apps/web/e2e/helpers/db.ts` — E2E database helper module
+  - [x] Implement `truncateTodos()` — runs `DELETE FROM todos` against the test database
+  - [x] Implement `seedTodos(todos)` — runs parameterised `INSERT INTO todos (text, is_completed) VALUES ...` against the test database
+  - [x] Implement `closeDbConnection()` — closes the `pg.Pool` connection for cleanup
+  - [x] Connection uses `DATABASE_URL` env var (same as the API uses: `postgresql://postgres:postgres@localhost:5432/bmad_experiment`)
+  - [x] Export a `TEST_TODOS` constant with known test data for deterministic assertions
 
-- [ ] Task 2: Update Playwright configuration (AC: 4, 6)
-  - [ ] Replace `apps/web/e2e/playwright.config.ts` with updated configuration
-  - [ ] Configure two Playwright projects:
+- [x] Task 2: Update Playwright configuration (AC: 4, 6)
+  - [x] Replace `apps/web/e2e/playwright.config.ts` with updated configuration
+  - [x] Configure two Playwright projects:
     - `view-todos` — matches `todos.spec.ts`, uses `baseURL: http://localhost:5173` (Chromium only for MVP)
     - `error-state` — matches `error-state.spec.ts`, uses `baseURL: http://localhost:5174` (Chromium only)
-  - [ ] Configure two `webServer` entries:
-    - Primary: `npm run dev` at `http://localhost:5173` with `reuseExistingServer: true`
-    - Error: `VITE_API_URL=http://localhost:19999 npx react-router dev --port 5174` at `http://localhost:5174` with `reuseExistingServer: true`
-  - [ ] Set `globalTeardown` to a module that calls `closeDbConnection()` to clean up the pg pool after all tests
-  - [ ] Remove `firefox` and `webkit` projects — Chromium only for MVP per AC 6
+  - [x] Configure two `webServer` entries (split into separate config files for reliability):
+    - Primary: `playwright.config.ts` — `npm run dev` at `http://localhost:5173` with `reuseExistingServer: true`
+    - Error: `playwright.error.config.ts` — `VITE_API_URL=http://localhost:19999 npx react-router dev --port 5174` at port 5174 with `reuseExistingServer: true`
+  - [x] Set `globalTeardown` to a module that calls `closeDbConnection()` to clean up the pg pool after all tests
+  - [x] Remove `firefox` and `webkit` projects — Chromium only for MVP per AC 6
 
-- [ ] Task 3: Delete outdated smoke test
-  - [ ] Delete `apps/web/e2e/smoke.spec.ts` (tests for old scaffold heading that no longer exists)
+- [x] Task 3: Delete outdated smoke test
+  - [x] Delete `apps/web/e2e/smoke.spec.ts` (tests for old scaffold heading that no longer exists)
 
-- [ ] Task 4: Write populated-state and persistence E2E tests (AC: 1, 2, 5)
-  - [ ] Create `apps/web/e2e/todos.spec.ts`
-  - [ ] Write `test.describe('UJ-2: View Todos')` block
-  - [ ] Add `test.beforeEach` that calls `truncateTodos()` then `seedTodos(TEST_TODOS)`
-  - [ ] Add `test.afterAll` that calls `closeDbConnection()`
-  - [ ] Write test: **populated state** — use `request.get('http://localhost:3000/todos')` via Playwright's API request context to capture the API response, then `page.goto('/')`, then assert each todo from the API response is rendered in the UI with correct text
-  - [ ] Assert active todos (not completed) render in the "ACTIVE" section with full-opacity text
-  - [ ] Assert completed todos render in the "COMPLETED" section with strikethrough styling
-  - [ ] Assert creation timestamps are displayed for each todo
-  - [ ] Write test: **data persistence** — seed DB, navigate to page, call `page.reload()`, assert todos are still present after reload (NFR-4)
+- [x] Task 4: Write populated-state and persistence E2E tests (AC: 1, 2, 5)
+  - [x] Create `apps/web/e2e/todos.spec.ts`
+  - [x] Write `test.describe('UJ-2: View Todos')` block
+  - [x] Add `test.beforeEach` that calls `truncateTodos()` then `seedTodos(TEST_TODOS)`
+  - [x] Add `test.afterAll` that calls `closeDbConnection()`
+  - [x] Write test: **populated state** — use `request.get('http://localhost:3000/todos')` via Playwright's API request context to capture the API response, then `page.goto('/')`, then assert each todo from the API response is rendered in the UI with correct text
+  - [x] Assert active todos (not completed) render in the "ACTIVE" section with full-opacity text
+  - [x] Assert completed todos render in the "COMPLETED" section with strikethrough styling
+  - [x] Assert creation timestamps are displayed for each todo
+  - [x] Write test: **data persistence** — seed DB, navigate to page, call `page.reload()`, assert todos are still present after reload (NFR-4)
 
-- [ ] Task 5: Write empty-state E2E test (AC: 3)
-  - [ ] In the same `todos.spec.ts` file, write the empty-state test
-  - [ ] `beforeEach` already truncates (no seeding needed for this test — use `test.describe` nesting or separate `beforeEach`)
-  - [ ] Write test: **empty state** — `truncateTodos()` explicitly in the test body (or separate describe with its own beforeEach), then `page.goto('/')`, assert heading "Nothing here yet." is visible, assert text "Type above to capture your first task." is visible
+- [x] Task 5: Write empty-state E2E test (AC: 3)
+  - [x] In the same `todos.spec.ts` file, write the empty-state test
+  - [x] `beforeEach` already truncates (no seeding needed for this test — use `test.describe` nesting or separate `beforeEach`)
+  - [x] Write test: **empty state** — `truncateTodos()` explicitly in the test body (or separate describe with its own beforeEach), then `page.goto('/')`, assert heading "Nothing here yet." is visible, assert text "Type above to capture your first task." is visible
 
-- [ ] Task 6: Write error-state E2E test (AC: 4)
-  - [ ] Create `apps/web/e2e/error-state.spec.ts` (separate file — runs against the error-project web server on port 5174)
-  - [ ] Write test: **error boundary** — `page.goto('/')`, assert the error boundary renders (look for role `alert` or heading text matching "Something went wrong" or "Request failed")
-  - [ ] Assert no blank screen — the error boundary message is visible
-  - [ ] Do NOT add any test-only code to the API — the web server genuinely fails because `VITE_API_URL` points to port 19999 where nothing is listening
+- [x] Task 6: Write error-state E2E test (AC: 4)
+  - [x] Create `apps/web/e2e/error-state.spec.ts` (separate file — runs against the error-project web server on port 5174)
+  - [x] Write test: **error boundary** — `page.goto('/')`, assert the error boundary renders (look for role `alert` or heading text matching "Something went wrong" or "Request failed")
+  - [x] Assert no blank screen — the error boundary message is visible
+  - [x] Do NOT add any test-only code to the API — the web server genuinely fails because `VITE_API_URL` points to port 19999 where nothing is listening
 
-- [ ] Task 7: Update `apps/web/package.json` scripts (AC: 6)
-  - [ ] Verify `test:e2e` script points to correct config: `playwright test --config e2e/playwright.config.ts`
-  - [ ] Optionally add `test:e2e:headed` script for local debugging: `playwright test --config e2e/playwright.config.ts --headed`
+- [x] Task 7: Update `apps/web/package.json` scripts (AC: 6)
+  - [x] Verify `test:e2e` script points to correct config: `playwright test --config e2e/playwright.config.ts`
+  - [x] Add `test:e2e:headed` script for local debugging: `playwright test --config e2e/playwright.config.ts --headed`
+  - [x] Add `test:e2e:error` script for error-state tests: `playwright test --config e2e/playwright.error.config.ts`
 
-- [ ] Task 8: Run and validate all E2E tests (AC: 1–6)
-  - [ ] Ensure PostgreSQL is running: `docker compose up -d postgres`
-  - [ ] Ensure API is running: `npm run dev -w apps/api` (or the Playwright webServer handles the web app)
-  - [ ] Run `npm run test:e2e -w apps/web` — all tests pass
-  - [ ] Verify populated-state test asserts all seeded todos
-  - [ ] Verify empty-state test asserts EmptyState with correct copy
-  - [ ] Verify error-state test asserts error boundary
-  - [ ] Verify persistence test asserts data survives reload
-  - [ ] Run `npm run lint -w apps/web` — zero lint errors in new files
+- [x] Task 8: Run and validate all E2E tests (AC: 1–6)
+  - [x] Ensure PostgreSQL is running: `docker compose up -d postgres`
+  - [x] Ensure API is running: `npm run dev -w apps/api`
+  - [x] Run `npm run test:e2e -w apps/web` — 3 tests pass (populated, persistence, empty)
+  - [x] Run `npm run test:e2e:error -w apps/web` — 1 test passes (error boundary)
+  - [x] Verify populated-state test asserts all seeded todos
+  - [x] Verify empty-state test asserts EmptyState with correct copy
+  - [x] Verify error-state test asserts error boundary
+  - [x] Verify persistence test asserts data survives reload
+  - [x] Run `npm run lint -w apps/web` — zero lint errors in new files
 
 ## Dev Notes
 
@@ -624,13 +626,22 @@ Claude Opus 4.6 (GitHub Copilot)
 
 ### Debug Log References
 
+1. **Vite 7 SSR incompatibility with Massimo client (pre-existing)**: Named/default exports from the Massimo-generated `api.client.ts` did not resolve in Vite 7.3.1's `SSRCompatModuleRunner`. Error: `(0 , __vite_ssr_import_0__.setBaseUrl) is not a function`. Fixed by rewriting `setup.server.ts` and `todos.server.ts` to use raw `fetch()` instead of the Massimo client. This was a pre-existing bug not introduced by this story.
+2. **Playwright dual webServer timeout**: Running two `react-router dev` instances from the same project directory caused Playwright webServer startup timeouts. The error-state server (with unreachable API) returned HTTP 500 which failed Playwright's `url:` health check. Fixed by splitting into two Playwright config files (`playwright.config.ts` for view-todos, `playwright.error.config.ts` for error-state) and using `port:` instead of `url:` for the error-state health check.
+
 ### Completion Notes List
+
+1. Playwright configs were split into two files instead of one with dual webServer entries. This is more reliable since running two `react-router dev` instances in the same directory can conflict.
+2. The `setup.server.ts` and `todos.server.ts` files were modified (pre-existing SSR bug fix) — these changes are outside the story's stated scope but were necessary for the web app to function.
+3. All 4 E2E test scenarios pass: populated state, data persistence, empty state, and error boundary.
 
 ### Change Log
 
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-03-16 | Story created | create-story workflow (Claude Opus 4.6) |
+| 2026-03-16 | Story implemented — all 8 tasks complete, 4/4 E2E tests passing | dev-story workflow (Claude Opus 4.6) |
+| 2026-03-17 | Code review: fixed 3 HIGH (dead file, gitignore, timestamp no-op), 3 MEDIUM (double pool.end, undocumented files, playwright-report gitignore) | code-review workflow (Claude Opus 4.6) |
 
 ### File List
 
@@ -639,10 +650,15 @@ Claude Opus 4.6 (GitHub Copilot)
 - `apps/web/e2e/global-teardown.ts` — Cleanup pg connections after all tests
 - `apps/web/e2e/todos.spec.ts` — Populated, empty, persistence E2E tests
 - `apps/web/e2e/error-state.spec.ts` — Error boundary E2E test
+- `apps/web/e2e/playwright.error.config.ts` — Separate Playwright config for error-state tests
 
 **Modified files:**
-- `apps/web/e2e/playwright.config.ts` — Multi-project config with two web servers
-- `apps/web/package.json` — Add `pg` and `@types/pg` devDependencies
+- `apps/web/e2e/playwright.config.ts` — View-todos Playwright config (single project, single webServer)
+- `apps/web/package.json` — Add `pg`, `@types/pg` devDependencies; add `test:e2e:error`, `test:e2e:headed` scripts
+- `apps/web/app/lib/api/setup.server.ts` — Simplified to export `API_BASE_URL` constant (removed Massimo `setBaseUrl` import)
+- `apps/web/app/lib/api/todos.server.ts` — Rewritten to use raw `fetch()` instead of Massimo client (SSR compatibility fix)
+- `apps/web/.gitignore` — Add `playwright-report/`, `test-results/` ignore rules
+- `package-lock.json` — Updated with `pg`, `@types/pg` dependency additions
 
 **Deleted files:**
 - `apps/web/e2e/smoke.spec.ts` — Outdated scaffold smoke test

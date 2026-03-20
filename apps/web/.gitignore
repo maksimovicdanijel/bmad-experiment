@@ -6,6 +6,10 @@
 /.react-router/
 /build/
 
+# Playwright
+/playwright-report/
+/test-results/
+
 # Generated API client
 /app/lib/api.client.mts
 /app/lib/api.client-types.d.ts

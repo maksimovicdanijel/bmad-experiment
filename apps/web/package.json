@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
+    "test:e2e:error": "playwright test --config e2e/playwright.error.config.ts",
+    "test:e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "test:e2e:list": "playwright test --list --config e2e/playwright.config.ts"
   },
   "dependencies": {
@@ -32,9 +34,11 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22",
+    "@types/pg": "^8.18.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "jsdom": "^28.1.0",
+    "pg": "^8.20.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",

@@ -6,21 +6,21 @@ export default defineConfig({
   retries: 0,
   reporter: [['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
     ...devices['Desktop Chrome'],
   },
-  globalTeardown: './global-teardown.ts',
   projects: [
     {
-      name: 'view-todos',
-      testMatch: 'todos.spec.ts',
+      name: 'error-state',
+      testMatch: 'error-state.spec.ts',
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command:
+      'VITE_API_URL=http://localhost:19999 npx react-router dev --port 5174',
+    port: 5174,
     reuseExistingServer: true,
-    timeout: 30_000,
+    timeout: 60_000,
   },
 });

@@ -1,11 +1,12 @@
 import type { Todo } from '@bmad/shared';
-import { getTodos } from '../api-client/api.client.mjs';
-import './setup.server';
+import type { ApiSuccess } from '@bmad/shared';
+import { API_BASE_URL } from './setup.server';
 
 export async function fetchTodos(): Promise<Todo[]> {
-  const response = await getTodos({});
-  if (response.statusCode !== 200) {
-    throw new Error(`API error: ${response.statusCode}`);
+  const response = await fetch(`${API_BASE_URL}/todos/`);
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
   }
-  return response.body.data;
+  const body: ApiSuccess<Todo[]> = await response.json();
+  return body.data;
 }

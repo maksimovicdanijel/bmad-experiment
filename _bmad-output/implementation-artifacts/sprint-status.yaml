@@ -54,7 +54,7 @@ development_status:
   epic-2: in-progress
   2-1-get-todos-api-endpoint: done
   2-2-todo-list-page-loader-layout-and-empty-state: done
-  2-3-playwright-e2e-view-todos-journey: ready-for-dev
+  2-3-playwright-e2e-view-todos-journey: done
   2-4-reorganise-api-feature-directory-structure: ready-for-dev
   2-5-post-todos-api-endpoint: backlog
   2-6-create-todo-taskinput-component-and-action: backlog
