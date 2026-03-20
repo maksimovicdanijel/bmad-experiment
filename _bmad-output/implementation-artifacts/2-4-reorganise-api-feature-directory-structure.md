@@ -19,11 +19,11 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
    src/features/todos/
      handlers/
        get.route.ts
+       get.schema.ts
+       get.route.test.ts
      queries.ts
      service.ts
-     schema.ts
      routes.ts
-     routes.test.ts
    ```
 
 2. **Given** `handlers/get.route.ts` exports a single Fastify route registration function for `GET /`,
@@ -48,7 +48,7 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
 
 7. **Given** a new feature needs to be added in the future (e.g., `users`),
    **When** a developer inspects the `src/features/` directory,
-   **Then** the pattern is immediately obvious: `src/features/users/handlers/`, `queries.ts`, `service.ts`, `schema.ts`, `routes.ts`.
+  **Then** the pattern is immediately obvious: `src/features/users/handlers/` (with `{verb}.route.ts`, `{verb}.schema.ts`, `{verb}.route.test.ts`), plus `queries.ts`, `service.ts`, `routes.ts`.
 
 8. **Given** the OpenAPI spec is re-exported after the reorganisation,
    **When** `openapi.json` is compared to the pre-reorganisation version,
@@ -68,8 +68,8 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
 - [x] Task 3: Move and rename feature files (AC: 1, 3)
   - [x] Move `src/todos/todos.queries.ts` → `src/features/todos/queries.ts`
   - [x] Move `src/todos/todos.service.ts` → `src/features/todos/service.ts`
-  - [x] Move `src/todos/todos.schema.ts` → `src/features/todos/schema.ts`
-  - [x] Move `src/todos/todos.routes.test.ts` → `src/features/todos/routes.test.ts`
+  - [x] Move `src/todos/todos.schema.ts` → `src/features/todos/handlers/get.schema.ts`
+  - [x] Move `src/todos/todos.routes.test.ts` → `src/features/todos/handlers/get.route.test.ts`
   - [x] Delete the old `src/todos/` directory after all files are moved
 
 - [x] Task 4: Extract GET handler into `handlers/get.route.ts` (AC: 1, 2)
@@ -77,7 +77,7 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
   - [x] Extract the `GET /` route registration from the old `todos.routes.ts` into `get.route.ts`
   - [x] Export a single Fastify route registration function (e.g., `export default async function getHandler(fastify: FastifyInstance)`)
   - [x] Import `listTodos` from `../service.js` (relative to handlers directory)
-  - [x] Import `todoJsonSchema` from `../schema.js`
+  - [x] Import `todoJsonSchema` from `./get.schema.js`
   - [x] Import `errorResponseSchema` from `../../../schemas.js`
 
 - [x] Task 5: Create new `routes.ts` barrel/aggregator (AC: 2, 3)
@@ -91,8 +91,8 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
   - [x] Update `server.ts`: change `import todosRoutes from './todos/todos.routes.js'` to `import todosRoutes from './features/todos/routes.js'`
   - [x] Update `queries.ts`: change `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
   - [x] Update `service.ts`: change `'./todos.queries.js'` → `'./queries.js'`
-  - [x] Update `routes.test.ts`: change `'../server.js'` → `'../../server.js'` and `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
-  - [x] Verify `schema.ts` imports — currently imports from `@bmad/shared` (absolute) so no change needed
+  - [x] Update `handlers/get.route.test.ts`: change `'../server.js'` → `'../../../server.js'` and `'../db/index.js'` → `'../../../db/index.js'` and `'../db/schema.js'` → `'../../../db/schema.js'`
+  - [x] Verify `handlers/get.schema.ts` imports — no external imports needed
   - [x] Verify `export-openapi.ts` — imports from `./server.js` (no change needed)
   - [x] Verify `server.test.ts` — imports from `./server.js` (no change needed)
 
@@ -138,8 +138,8 @@ src/todos/                          ← DELETE this directory after moves
   todos.routes.ts                   ← REPLACE with handlers/get.route.ts + routes.ts
   todos.service.ts                  ← MOVE to src/features/todos/service.ts
   todos.queries.ts                  ← MOVE to src/features/todos/queries.ts
-  todos.schema.ts                   ← MOVE to src/features/todos/schema.ts
-  todos.routes.test.ts              ← MOVE to src/features/todos/routes.test.ts
+  todos.schema.ts                   ← MOVE to src/features/todos/handlers/get.schema.ts
+  todos.routes.test.ts              ← MOVE to src/features/todos/handlers/get.route.test.ts
 ```
 
 **Files to modify (import paths only):**
@@ -170,11 +170,11 @@ src/
     todos/
       handlers/
         get.route.ts                ← GET / handler extracted from old todos.routes.ts
+        get.schema.ts               ← JSON schema for GET / response
+        get.route.test.ts           ← Contract tests for GET /todos
       queries.ts                    ← Renamed from todos.queries.ts, updated imports
       service.ts                    ← Renamed from todos.service.ts, updated imports
-      schema.ts                     ← Renamed from todos.schema.ts (no import changes)
       routes.ts                     ← NEW barrel file — imports & registers handlers
-      routes.test.ts                ← Renamed from todos.routes.test.ts, updated imports
   db/                               ← Unchanged
   test/                             ← Unchanged
   schemas.ts                        ← Unchanged
@@ -207,16 +207,16 @@ import { getAllTodos } from './queries.js';
 // @bmad/shared import unchanged (absolute package import)
 ```
 
-**`src/features/todos/schema.ts`** (was `src/todos/todos.schema.ts`):
+**`src/features/todos/handlers/get.schema.ts`** (was `src/todos/todos.schema.ts`):
 ```typescript
-// NO CHANGES — all imports are absolute (@bmad/shared)
+// No external imports — schema co-located with GET handler
 ```
 
 **`src/features/todos/handlers/get.route.ts`** (extracted from old `todos.routes.ts`):
 ```typescript
 import type { FastifyPluginAsync } from 'fastify';
 import { listTodos } from '../service.js';
-import { todoJsonSchema } from '../schema.js';
+import { todoJsonSchema } from './get.schema.js';
 import { errorResponseSchema } from '../../../schemas.js';
 ```
 
@@ -241,7 +241,7 @@ import todosRoutes from './todos/todos.routes.js';
 import todosRoutes from './features/todos/routes.js';
 ```
 
-**`src/features/todos/routes.test.ts`** (was `src/todos/todos.routes.test.ts`):
+**`src/features/todos/handlers/get.route.test.ts`** (was `src/todos/todos.routes.test.ts`):
 ```typescript
 // OLD:
 import { buildApp } from '../server.js';
@@ -249,9 +249,9 @@ import { db } from '../db/index.js';
 import { todos } from '../db/schema.js';
 
 // NEW (one level deeper → needs ../ added):
-import { buildApp } from '../../server.js';
-import { db } from '../../db/index.js';
-import { todos } from '../../db/schema.js';
+import { buildApp } from '../../../server.js';
+import { db } from '../../../db/index.js';
+import { todos } from '../../../db/schema.js';
 ```
 
 ### Handler Extraction Pattern
@@ -274,7 +274,7 @@ const todosRoutes: FastifyPluginAsync = async (fastify) => {
 ```typescript
 import type { FastifyPluginAsync } from 'fastify';
 import { listTodos } from '../service.js';
-import { todoJsonSchema } from '../schema.js';
+import { todoJsonSchema } from './get.schema.js';
 import { errorResponseSchema } from '../../../schemas.js';
 
 /**
@@ -334,10 +334,10 @@ export default todosRoutes;
 ### Project Structure Notes
 
 - This reorganisation creates the `src/features/` directory as the canonical home for all domain-specific code
-- Future features (e.g., `users` for auth in post-MVP) follow the identical pattern: `src/features/users/handlers/`, `queries.ts`, `service.ts`, `schema.ts`, `routes.ts`
+- Future features (e.g., `users` for auth in post-MVP) follow the identical pattern: `src/features/users/handlers/` (with `{verb}.route.ts`, `{verb}.schema.ts`, `{verb}.route.test.ts`), plus `queries.ts`, `service.ts`, `routes.ts`
 - Infrastructure code (`db/`, `schemas.ts`, `server.ts`, `test/`) stays at the `src/` root level — it is NOT feature-specific
 - File naming follows `kebab-case` — all new files must comply
-- The `handlers/` subdirectory naming convention is `{verb}.route.ts` (e.g., `get.route.ts`, `post.route.ts`, `patch.route.ts`, `delete.route.ts`)
+- The `handlers/` subdirectory naming convention is `{verb}.route.ts`, `{verb}.schema.ts`, `{verb}.route.test.ts`
 - After this story, Story 2.5 (POST endpoint) adds `handlers/post.route.ts` directly — no further refactoring needed
 
 ### Scope Boundaries — What NOT to Do
@@ -357,9 +357,9 @@ export default todosRoutes;
 
 **From Story 2.1 (done — GET /todos API endpoint):**
 - The `GET /` handler is fully implemented with OpenAPI schema, service delegation, and error response schemas
-- The handler imports `listTodos` from `./todos.service.js` and `todoJsonSchema` from `./todos.schema.js`
+- The handler imports `listTodos` from `./service.js` and `todoJsonSchema` from `./handlers/get.schema.js`
 - The handler also imports `errorResponseSchema` from `../schemas.js` — this will become `../../../schemas.js` when moved into `handlers/`
-- Contract tests import `buildApp` from `../server.js`, `db` from `../db/index.js`, `todos` from `../db/schema.js`
+- Contract tests import `buildApp` from `../../../server.js`, `db` from `../../../db/index.js`, `todos` from `../../../db/schema.js`
 - Code review fix (M1): Moved `errorResponseSchema` from `src/common/schemas.ts` to `src/schemas.ts` — `common/` directory violated the architecture's "by feature" rule. **Do NOT re-introduce a `common/` directory.**
 - Test files use `beforeEach(async () => { await db.delete(todos); })` for cleanup — imports must remain correct after move
 
@@ -395,7 +395,7 @@ f7a28f1 feat: todos endpoint
 
 - **No new tests to write** — this is a pure refactoring story
 - **All existing tests must pass unchanged** — proving the refactoring is safe
-- The test file `routes.test.ts` only needs import path updates (deeper nesting requires extra `../`)
+- The test file `handlers/get.route.test.ts` only needs import path updates (deeper nesting requires extra `../`)
 - `server.test.ts` does NOT need changes — it imports from `./server.js` which hasn't moved
 - Run `npm run test -w apps/api` before AND after the refactoring to prove zero regressions
 - Run `npm run test` from workspace root to verify nothing else broke
@@ -409,12 +409,12 @@ f7a28f1 feat: todos endpoint
 - [Source: _bmad-output/planning-artifacts/epics.md — Story 2.4 acceptance criteria defining target src/features/todos/ structure]
 - [Source: _bmad-output/planning-artifacts/architecture.md — Backend organisation patterns, naming conventions, service boundaries, kebab-case file naming]
 - [Source: _bmad-output/planning-artifacts/architecture.md — "Structure Patterns" section: by-feature backend organisation, file co-location]
-- [Source: apps/api/src/server.ts — current todosRoutes import: `import todosRoutes from './todos/todos.routes.js'`]
-- [Source: apps/api/src/todos/todos.routes.ts — current GET / handler implementation with OpenAPI schema]
-- [Source: apps/api/src/todos/todos.service.ts — listTodos() function, imports from ./todos.queries.js]
-- [Source: apps/api/src/todos/todos.queries.ts — getAllTodos() function, imports from ../db/index.js and ../db/schema.js]
-- [Source: apps/api/src/todos/todos.schema.ts — todoJsonSchema, createTodoJsonSchema, updateTodoJsonSchema, imports from @bmad/shared only]
-- [Source: apps/api/src/todos/todos.routes.test.ts — contract tests, imports from ../server.js, ../db/index.js, ../db/schema.js]
+- [Source: apps/api/src/server.ts — current todosRoutes import: `import todosRoutes from './features/todos/routes.js'`]
+- [Source: apps/api/src/features/todos/handlers/get.route.ts — current GET / handler implementation with OpenAPI schema]
+- [Source: apps/api/src/features/todos/service.ts — listTodos() function, imports from ./queries.js]
+- [Source: apps/api/src/features/todos/queries.ts — getAllTodos() function, imports from ../../db/index.js and ../../db/schema.js]
+- [Source: apps/api/src/features/todos/handlers/get.schema.ts — todoJsonSchema, imports none]
+- [Source: apps/api/src/features/todos/handlers/get.route.test.ts — contract tests, imports from ../../../server.js, ../../../db/index.js, ../../../db/schema.js]
 - [Source: apps/api/src/schemas.ts — errorResponseSchema at src/ root, imported by routes as ../schemas.js]
 - [Source: apps/api/src/export-openapi.ts — imports from ./server.js (no change needed)]
 - [Source: apps/api/src/server.test.ts — imports from ./server.js (no change needed)]
@@ -439,6 +439,7 @@ Claude Opus 4.6 (GitHub Copilot)
 - Pure structural refactoring completed with zero functional changes
 - Established `src/features/` as canonical home for feature-based directory structure
 - Extracted GET handler into `handlers/get.route.ts` as standalone Fastify plugin
+- Co-located GET response schema and contract tests under `handlers/`
 - Created `routes.ts` barrel/aggregator with JSDoc documenting the handler registration pattern
 - All 14 existing tests pass unchanged — zero regressions
 - OpenAPI spec semantically identical (minor JSON formatting differences in `required` array whitespace due to nested plugin registration; original formatting preserved)
@@ -457,11 +458,11 @@ Claude Opus 4.6 (GitHub Copilot)
 | File | Action | Description |
 |------|--------|-------------|
 | `apps/api/src/features/todos/handlers/get.route.ts` | Created | Extracted GET / handler from old todos.routes.ts |
+| `apps/api/src/features/todos/handlers/get.schema.ts` | Moved+Renamed | From src/todos/todos.schema.ts — co-located with GET handler |
+| `apps/api/src/features/todos/handlers/get.route.test.ts` | Moved+Renamed | From src/todos/todos.routes.test.ts — updated imports to ../../../ paths |
 | `apps/api/src/features/todos/routes.ts` | Created | Barrel/aggregator plugin — imports and registers all handlers |
 | `apps/api/src/features/todos/queries.ts` | Moved+Renamed | From src/todos/todos.queries.ts — updated db imports to ../../db/ |
 | `apps/api/src/features/todos/service.ts` | Moved+Renamed | From src/todos/todos.service.ts — updated import to ./queries.js |
-| `apps/api/src/features/todos/schema.ts` | Moved+Renamed | From src/todos/todos.schema.ts — no import changes (all absolute) |
-| `apps/api/src/features/todos/routes.test.ts` | Moved+Renamed | From src/todos/todos.routes.test.ts — updated imports to ../../ paths |
 | `apps/api/src/server.ts` | Modified | Updated import from ./todos/todos.routes.js to ./features/todos/routes.js |
 | `apps/api/src/todos/` | Deleted | Entire directory removed after all files moved |
 | `apps/api/openapi.json` | Regenerated | Must be identical to pre-reorganisation version |
