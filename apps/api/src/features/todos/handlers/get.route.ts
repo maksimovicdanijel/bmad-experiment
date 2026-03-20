@@ -1,13 +1,13 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { listTodos } from './todos.service.js';
-import { todoJsonSchema } from './todos.schema.js';
-import { errorResponseSchema } from '../schemas.js';
+import { listTodos } from '../service.js';
+import { todoJsonSchema } from './get.schema.js';
+import { errorResponseSchema } from '../../../schemas.js';
 
 /**
- * todosRoutes — Fastify plugin for the /todos resource.
- * Do NOT wrap with fastify-plugin — route encapsulation is intentional.
+ * GET / — Returns all todos ordered by createdAt descending.
+ * Registered by the parent routes.ts plugin with prefix '/todos'.
  */
-const todosRoutes: FastifyPluginAsync = async (fastify) => {
+const getHandler: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     '/',
     {
@@ -32,4 +32,4 @@ const todosRoutes: FastifyPluginAsync = async (fastify) => {
   );
 };
 
-export default todosRoutes;
+export default getHandler;

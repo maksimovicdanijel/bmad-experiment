@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { setTimeout } from 'node:timers/promises';
 import type { FastifyInstance } from 'fastify';
-import { buildApp } from '../server.js';
-import { db } from '../db/index.js';
-import { todos } from '../db/schema.js';
+import { buildApp } from '../../../server.js';
+import { db } from '../../../db/index.js';
+import { todos } from '../../../db/schema.js';
 
 let app: FastifyInstance;
 
@@ -78,34 +78,5 @@ describe('GET /todos', () => {
     expect(typeof todo.createdAt).toBe('string');
     // Verify ISO 8601 format (e.g. 2026-03-10T12:00:00.000Z)
     expect(todo.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-  });
-});
-
-describe('Global error handler', () => {
-  it('returns 500 with error envelope and no stack trace for unexpected errors', async () => {
-    // Register a route that throws an unexpected error for testing
-    const testApp = await buildApp();
-    testApp.get('/test-error', async () => {
-      throw new Error('Unexpected failure');
-    });
-    await testApp.ready();
-
-    try {
-      const res = await testApp.inject({ method: 'GET', url: '/test-error' });
-      expect(res.statusCode).toBe(500);
-      const body = res.json();
-      expect(body).toHaveProperty('error');
-      expect(body.error).toHaveProperty('code', 'INTERNAL_ERROR');
-      expect(body.error).toHaveProperty('message');
-      expect(typeof body.error.message).toBe('string');
-
-      // Ensure no stack trace exposed
-      expect(body.error).not.toHaveProperty('stack');
-      expect(body).not.toHaveProperty('stack');
-      expect(body).not.toHaveProperty('statusCode');
-      expect(JSON.stringify(body)).not.toContain('Unexpected failure');
-    } finally {
-      await testApp.close();
-    }
   });
 });

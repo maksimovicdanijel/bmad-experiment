@@ -1,5 +1,5 @@
 import type { Todo } from '@bmad/shared';
-import { getAllTodos } from './todos.queries.js';
+import { getAllTodos } from './queries.js';
 
 /**
  * List all todos ordered by creation date descending.

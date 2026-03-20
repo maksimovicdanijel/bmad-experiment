@@ -5,7 +5,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
-import todosRoutes from './todos/todos.routes.js';
+import todosRoutes from './features/todos/routes.js';
 
 const envSchema = {
   type: 'object' as const,

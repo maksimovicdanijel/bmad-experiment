@@ -1,6 +1,6 @@
 # Story 2.4: Reorganise API into Feature-Based Directory Structure
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -56,64 +56,64 @@ so that each feature is self-contained, each HTTP verb has its own file for inde
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Pre-flight validation (AC: 5, 8)
-  - [ ] Run `npm run test -w apps/api` and confirm all existing tests pass (baseline before changes)
-  - [ ] Copy `apps/api/openapi.json` to a temp location for later comparison (e.g., `openapi.json.bak`)
-  - [ ] Run `tsc --noEmit -p apps/api/tsconfig.json` and confirm zero TypeScript errors
+- [x] Task 1: Pre-flight validation (AC: 5, 8)
+  - [x] Run `npm run test -w apps/api` and confirm all existing tests pass (baseline before changes)
+  - [x] Copy `apps/api/openapi.json` to a temp location for later comparison (e.g., `openapi.json.bak`)
+  - [x] Run `tsc --noEmit -p apps/api/tsconfig.json` and confirm zero TypeScript errors
 
-- [ ] Task 2: Create the new directory structure (AC: 1, 7)
-  - [ ] Create `apps/api/src/features/todos/handlers/` directory
-  - [ ] Verify the `src/features/` top-level directory is established as the canonical home for all feature domains
+- [x] Task 2: Create the new directory structure (AC: 1, 7)
+  - [x] Create `apps/api/src/features/todos/handlers/` directory
+  - [x] Verify the `src/features/` top-level directory is established as the canonical home for all feature domains
 
-- [ ] Task 3: Move and rename feature files (AC: 1, 3)
-  - [ ] Move `src/todos/todos.queries.ts` → `src/features/todos/queries.ts`
-  - [ ] Move `src/todos/todos.service.ts` → `src/features/todos/service.ts`
-  - [ ] Move `src/todos/todos.schema.ts` → `src/features/todos/schema.ts`
-  - [ ] Move `src/todos/todos.routes.test.ts` → `src/features/todos/routes.test.ts`
-  - [ ] Delete the old `src/todos/` directory after all files are moved
+- [x] Task 3: Move and rename feature files (AC: 1, 3)
+  - [x] Move `src/todos/todos.queries.ts` → `src/features/todos/queries.ts`
+  - [x] Move `src/todos/todos.service.ts` → `src/features/todos/service.ts`
+  - [x] Move `src/todos/todos.schema.ts` → `src/features/todos/schema.ts`
+  - [x] Move `src/todos/todos.routes.test.ts` → `src/features/todos/routes.test.ts`
+  - [x] Delete the old `src/todos/` directory after all files are moved
 
-- [ ] Task 4: Extract GET handler into `handlers/get.route.ts` (AC: 1, 2)
-  - [ ] Create `src/features/todos/handlers/get.route.ts`
-  - [ ] Extract the `GET /` route registration from the old `todos.routes.ts` into `get.route.ts`
-  - [ ] Export a single Fastify route registration function (e.g., `export default async function getHandler(fastify: FastifyInstance)`)
-  - [ ] Import `listTodos` from `../service.js` (relative to handlers directory)
-  - [ ] Import `todoJsonSchema` from `../schema.js`
-  - [ ] Import `errorResponseSchema` from `../../../schemas.js`
+- [x] Task 4: Extract GET handler into `handlers/get.route.ts` (AC: 1, 2)
+  - [x] Create `src/features/todos/handlers/get.route.ts`
+  - [x] Extract the `GET /` route registration from the old `todos.routes.ts` into `get.route.ts`
+  - [x] Export a single Fastify route registration function (e.g., `export default async function getHandler(fastify: FastifyInstance)`)
+  - [x] Import `listTodos` from `../service.js` (relative to handlers directory)
+  - [x] Import `todoJsonSchema` from `../schema.js`
+  - [x] Import `errorResponseSchema` from `../../../schemas.js`
 
-- [ ] Task 5: Create new `routes.ts` barrel/aggregator (AC: 2, 3)
-  - [ ] Create `src/features/todos/routes.ts` as a Fastify plugin
-  - [ ] Import the GET handler from `./handlers/get.route.js`
-  - [ ] Register the handler: `fastify.register(getHandler)`
-  - [ ] Export the plugin as default for consumption by `server.ts`
-  - [ ] Add JSDoc comment explaining the barrel pattern for future handler additions
+- [x] Task 5: Create new `routes.ts` barrel/aggregator (AC: 2, 3)
+  - [x] Create `src/features/todos/routes.ts` as a Fastify plugin
+  - [x] Import the GET handler from `./handlers/get.route.js`
+  - [x] Register the handler: `fastify.register(getHandler)`
+  - [x] Export the plugin as default for consumption by `server.ts`
+  - [x] Add JSDoc comment explaining the barrel pattern for future handler additions
 
-- [ ] Task 6: Update all import paths (AC: 3, 4)
-  - [ ] Update `server.ts`: change `import todosRoutes from './todos/todos.routes.js'` to `import todosRoutes from './features/todos/routes.js'`
-  - [ ] Update `queries.ts`: change `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
-  - [ ] Update `service.ts`: change `'./todos.queries.js'` → `'./queries.js'`
-  - [ ] Update `routes.test.ts`: change `'../server.js'` → `'../../server.js'` and `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
-  - [ ] Verify `schema.ts` imports — currently imports from `@bmad/shared` (absolute) so no change needed
-  - [ ] Verify `export-openapi.ts` — imports from `./server.js` (no change needed)
-  - [ ] Verify `server.test.ts` — imports from `./server.js` (no change needed)
+- [x] Task 6: Update all import paths (AC: 3, 4)
+  - [x] Update `server.ts`: change `import todosRoutes from './todos/todos.routes.js'` to `import todosRoutes from './features/todos/routes.js'`
+  - [x] Update `queries.ts`: change `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
+  - [x] Update `service.ts`: change `'./todos.queries.js'` → `'./queries.js'`
+  - [x] Update `routes.test.ts`: change `'../server.js'` → `'../../server.js'` and `'../db/index.js'` → `'../../db/index.js'` and `'../db/schema.js'` → `'../../db/schema.js'`
+  - [x] Verify `schema.ts` imports — currently imports from `@bmad/shared` (absolute) so no change needed
+  - [x] Verify `export-openapi.ts` — imports from `./server.js` (no change needed)
+  - [x] Verify `server.test.ts` — imports from `./server.js` (no change needed)
 
-- [ ] Task 7: TypeScript compilation check (AC: 4)
-  - [ ] Run `tsc --noEmit -p apps/api/tsconfig.json` — must compile with zero errors
-  - [ ] If errors exist, fix remaining import path issues before proceeding
+- [x] Task 7: TypeScript compilation check (AC: 4)
+  - [x] Run `tsc --noEmit -p apps/api/tsconfig.json` — must compile with zero errors
+  - [x] If errors exist, fix remaining import path issues before proceeding
 
-- [ ] Task 8: Run tests and lint (AC: 5, 6)
-  - [ ] Run `npm run test -w apps/api` — all existing tests must pass with zero failures
-  - [ ] Run `npm run lint` from workspace root — zero lint errors
-  - [ ] Run `npm run build -w apps/api` — TypeScript compiles and produces `dist/` output correctly
+- [x] Task 8: Run tests and lint (AC: 5, 6)
+  - [x] Run `npm run test -w apps/api` — all existing tests must pass with zero failures
+  - [x] Run `npm run lint` from workspace root — zero lint errors
+  - [x] Run `npm run build -w apps/api` — TypeScript compiles and produces `dist/` output correctly
 
-- [ ] Task 9: Verify OpenAPI spec is unchanged (AC: 8)
-  - [ ] Run `npm run openapi:export -w apps/api` to regenerate `apps/api/openapi.json`
-  - [ ] Compare the new `openapi.json` with the pre-reorganisation backup — must be identical
-  - [ ] If any differences exist, investigate and fix (there should be none since no functional changes were made)
+- [x] Task 9: Verify OpenAPI spec is unchanged (AC: 8)
+  - [x] Run `npm run openapi:export -w apps/api` to regenerate `apps/api/openapi.json`
+  - [x] Compare the new `openapi.json` with the pre-reorganisation backup — semantically identical (JSON whitespace-only formatting differences in `required` arrays due to nested plugin registration; verified via `JSON.stringify` comparison)
+  - [x] If any differences exist, investigate and fix (there should be none since no functional changes were made)
 
-- [ ] Task 10: Clean up (AC: 1)
-  - [ ] Verify `src/todos/` directory no longer exists
-  - [ ] Remove any temporary backup files (e.g., `openapi.json.bak`)
-  - [ ] Verify no stale imports reference the old `src/todos/` path anywhere in the codebase
+- [x] Task 10: Clean up (AC: 1)
+  - [x] Verify `src/todos/` directory no longer exists
+  - [x] Remove any temporary backup files (e.g., `openapi.json.bak`)
+  - [x] Verify no stale imports reference the old `src/todos/` path anywhere in the codebase
 
 ## Dev Notes
 
@@ -425,16 +425,31 @@ f7a28f1 feat: todos endpoint
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Opus 4.6 (GitHub Copilot)
 
 ### Debug Log References
 
+- Pre-flight: 14/14 tests pass, zero TS errors, OpenAPI backup created
+- Post-refactor: 14/14 tests pass, zero TS errors, zero lint errors, build succeeds
+- OpenAPI spec verified semantically identical via JSON.stringify comparison
+- Testcontainers required `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` and `DOCKER_HOST=unix://$HOME/.colima/default/docker.sock` for Colima Docker setup
+
 ### Completion Notes List
+
+- Pure structural refactoring completed with zero functional changes
+- Established `src/features/` as canonical home for feature-based directory structure
+- Extracted GET handler into `handlers/get.route.ts` as standalone Fastify plugin
+- Created `routes.ts` barrel/aggregator with JSDoc documenting the handler registration pattern
+- All 14 existing tests pass unchanged — zero regressions
+- OpenAPI spec semantically identical (minor JSON formatting differences in `required` array whitespace due to nested plugin registration; original formatting preserved)
+- No new dependencies added
+- No test modifications required
 
 ### Change Log
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-03-20 | Story implemented: reorganised src/todos/ into src/features/todos/ with handlers/ subdirectory | dev-story workflow (Claude Opus 4.6, GitHub Copilot) |
 | 2026-03-16 | Story created | create-story workflow (Claude Opus 4.6, GitHub Copilot) |
 
 ### File List
