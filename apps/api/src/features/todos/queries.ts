@@ -9,3 +9,11 @@ import type { TodoRow } from '../../db/schema.js';
 export async function getAllTodos(): Promise<TodoRow[]> {
   return db.select().from(todos).orderBy(desc(todos.createdAt));
 }
+
+/**
+ * Insert a new todo and return the created row.
+ */
+export async function insertTodo(id: string, text: string): Promise<TodoRow> {
+  const [row] = await db.insert(todos).values({ id, text }).returning();
+  return row;
+}

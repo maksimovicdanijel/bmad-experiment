@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import getHandler from './handlers/get.route.js';
+import postHandler from './handlers/post.route.js';
 
 /**
  * todosRoutes — Aggregator plugin for the /todos resource.
@@ -13,6 +14,7 @@ import getHandler from './handlers/get.route.js';
  */
 const todosRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.register(getHandler);
+  fastify.register(postHandler);
 };
 
 export default todosRoutes;

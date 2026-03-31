@@ -5,5 +5,6 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     globalSetup: ['./src/test/global-setup.ts'],
+    fileParallelism: false,
   },
 });
