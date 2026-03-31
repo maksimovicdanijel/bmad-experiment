@@ -1,4 +1,4 @@
-import { it, expect, vi, afterEach } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { screen, cleanup } from '@testing-library/react';
 import { renderWithProviders } from '../test-utils';
 
@@ -6,10 +6,33 @@ vi.mock('../lib/api/index.server', () => ({
   fetchTodos: vi.fn(),
 }));
 
+const mockFetcherSubmit = vi.fn();
+const mockFetcher = {
+  submit: mockFetcherSubmit,
+  state: 'idle' as string,
+  data: undefined as { error?: { message: string } } | undefined,
+  load: vi.fn(),
+};
+
+vi.mock('react-router', async () => {
+  const actual =
+    await vi.importActual<typeof import('react-router')>('react-router');
+
+  return {
+    ...actual,
+    useFetcher: () => mockFetcher,
+  };
+});
+
 import type { Todo } from '@bmad/shared';
 
 // Dynamically import the component after mocking
 const { default: Home } = await import('./home');
+
+beforeEach(() => {
+  mockFetcher.state = 'idle';
+  mockFetcher.data = undefined;
+});
 
 afterEach(() => {
   cleanup();
@@ -86,4 +109,22 @@ it('renders active and completed section headers with correct counts', () => {
     selector: '[aria-live="polite"]',
   });
   expect(liveRegions).toHaveLength(2);
+});
+
+it('renders TaskInput for creating todos', () => {
+  // @ts-expect-error - testing without router-injected params/matches
+  renderWithProviders(<Home loaderData={{ todos: [] }} />);
+
+  expect(screen.getByPlaceholderText('Add a task...')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+});
+
+it('passes fetcher server error to TaskInput as errorMessage', () => {
+  mockFetcher.data = { error: { message: 'Server blew up' } };
+
+  // @ts-expect-error - testing without router-injected params/matches
+  renderWithProviders(<Home loaderData={{ todos: [] }} />);
+
+  expect(screen.getByText('Server blew up')).toBeInTheDocument();
+  expect(screen.getByRole('alert')).toBeInTheDocument();
 });
