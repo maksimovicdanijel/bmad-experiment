@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import type { CreateTodoRequest } from '@bmad/shared';
 import { createTodo } from '../service.js';
 import {
   createTodoBodySchema,
@@ -14,7 +15,7 @@ import { errorResponseSchema } from '../../../schemas.js';
  * with the application-specific message before responding.
  */
 const postHandler: FastifyPluginAsync = async (fastify) => {
-  fastify.post(
+  fastify.post<{ Body: CreateTodoRequest }>(
     '/',
     {
       schema: {
@@ -50,7 +51,7 @@ const postHandler: FastifyPluginAsync = async (fastify) => {
         });
       }
 
-      const { text } = request.body as { text: string };
+      const { text } = request.body;
       const todo = await createTodo(text);
       return reply.status(201).send({ data: todo });
     },

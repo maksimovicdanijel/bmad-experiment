@@ -106,6 +106,35 @@ describe('POST /todos', () => {
     });
   });
 
+  it('returns 400 with validation error when text property is missing', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/todos',
+      payload: {},
+    });
+
+    expect(res.statusCode).toBe(400);
+    const body = res.json();
+    expect(body).toHaveProperty('error');
+    expect(body.error).toHaveProperty('code', 'VALIDATION_ERROR');
+    expect(body.error).toHaveProperty(
+      'message',
+      'text must be between 1 and 255 characters',
+    );
+  });
+
+  it('returns 400 when request body is missing', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/todos',
+    });
+
+    expect(res.statusCode).toBe(400);
+    const body = res.json();
+    expect(body).toHaveProperty('error');
+    expect(body.error).toHaveProperty('code', 'VALIDATION_ERROR');
+  });
+
   it('persists the created todo (GET returns it)', async () => {
     const createRes = await app.inject({
       method: 'POST',

@@ -1,6 +1,6 @@
 # Story 2.5: POST /todos API Endpoint
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -167,9 +167,31 @@ Claude Opus 4.6
 - `apps/api/src/features/todos/routes.ts` (modified)
 - `apps/api/src/features/todos/service.ts` (modified)
 - `apps/api/src/features/todos/queries.ts` (modified)
-- `apps/api/vitest.config.ts` (modified — added fileParallelism: false)
+- `apps/api/src/features/todos/handlers/get.route.ts` (modified — import path updated)
+- `apps/api/src/features/todos/handlers/get.schema.ts` (deleted — duplicate of schema.ts)
+- `apps/api/vitest.config.ts` (modified — added fileParallelism: false with comment)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (modified)
+
+## Senior Developer Review (AI)
+
+**Reviewer:** Claude Opus 4.6 (adversarial code review)  
+**Date:** 2026-03-31  
+**Outcome:** Approve (after fixes applied)
+
+### Issues Found: 3 High, 3 Medium, 2 Low
+
+### Action Items
+
+- [x] [HIGH] H1: Duplicate `todoJsonSchema` in `get.schema.ts` and `schema.ts` — deleted `get.schema.ts`, updated `get.route.ts` import to canonical `../schema.js`
+- [x] [HIGH] H2: Missing test for request body without `text` property (`{}`) — added test asserting 400 with correct validation error
+- [x] [HIGH] H3: Missing test for entirely missing request body — added test asserting 400 with VALIDATION_ERROR code
+- [x] [MED] M1: Acknowledged — DB errors are already safely handled by Fastify's global error handler returning generic 500 envelope; no code change needed
+- [x] [MED] M2: Duplicate row-to-Todo mapping in `listTodos` and `createTodo` — extracted shared `mapRowToTodo(row)` helper in service.ts
+- [x] [MED] M3: `fileParallelism: false` lacks explanation — added comment documenting rationale (shared testcontainers DB)
+- [x] [LOW] L1: Unnecessary re-export in `post.schema.ts` — acknowledged, kept for consistency with `get.schema.ts` pattern (now deleted, so moot)
+- [x] [LOW] L2: Inline `as` type assertion in handler — replaced with typed generic `fastify.post<{ Body: CreateTodoRequest }>`
 
 ## Change Log
 
 - **2026-03-20:** Implemented POST /todos endpoint with full TDD cycle. Added create query, service with UUID generation, Fastify handler with Zod-derived schema validation, and 7 contract tests. Fixed test file parallelism to prevent cross-file DB isolation issues.
+- **2026-03-31:** Code review (adversarial). Fixed 3 HIGH, 2 MEDIUM, 1 LOW issues: consolidated duplicate todoJsonSchema (deleted get.schema.ts), added 2 edge-case tests (missing text, missing body), extracted mapRowToTodo helper, typed Fastify generic. All 23 tests pass, lint clean, build clean.

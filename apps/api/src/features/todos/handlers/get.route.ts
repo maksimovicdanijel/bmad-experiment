@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { listTodos } from '../service.js';
-import { todoJsonSchema } from './get.schema.js';
+import { todoJsonSchema } from '../schema.js';
 import { errorResponseSchema } from '../../../schemas.js';
 
 /**
