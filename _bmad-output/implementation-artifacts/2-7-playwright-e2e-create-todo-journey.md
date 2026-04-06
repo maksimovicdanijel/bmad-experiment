@@ -1,6 +1,6 @@
 # Story 2.7: Playwright E2E — Create Todo Journey
 
-**Status:** ready-for-dev
+**Status:** done
 
 **Story ID:** 2.7  
 **Epic:** 2 (View & Capture Todos)  
@@ -38,34 +38,34 @@ so that the create slice is backed by automated end-to-end evidence running in C
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Extend the existing Playwright todo journey spec with UJ-1 create coverage (AC: 1, 2, 3)
-  - [ ] Add a new `test.describe('UJ-1: Create Todo')` block in `apps/web/e2e/todos.spec.ts`
-  - [ ] Start each UJ-1 test from a clean DB by reusing `truncateTodos()` from `apps/web/e2e/helpers/db.ts`
-  - [ ] Write the failing test first before changing any app code or test helpers
-  - [ ] Assert the first-use empty state is visible before creation begins
-  - [ ] Fill the `TaskInput` with a realistic todo string and submit via Enter, not button click
-  - [ ] Assert the new todo appears in the active list without using arbitrary timeouts
-  - [ ] Assert the empty state disappears after successful creation
-  - [ ] Reload the page and assert the created todo remains visible
+- [x] Task 1: Extend the existing Playwright todo journey spec with UJ-1 create coverage (AC: 1, 2, 3)
+  - [x] Add a new `test.describe('UJ-1: Create Todo')` block in `apps/web/e2e/todos.spec.ts`
+  - [x] Start each UJ-1 test from a clean DB by reusing `truncateTodos()` from `apps/web/e2e/helpers/db.ts`
+  - [x] Write the failing test first before changing any app code or test helpers
+  - [x] Assert the first-use empty state is visible before creation begins
+  - [x] Fill the `TaskInput` with a realistic todo string and submit via Enter, not button click
+  - [x] Assert the new todo appears in the active list without using arbitrary timeouts
+  - [x] Assert the empty state disappears after successful creation
+  - [x] Reload the page and assert the created todo remains visible
 
-- [ ] Task 2: Reuse the existing E2E infrastructure rather than introducing parallel patterns (AC: 1, 4)
-  - [ ] Keep the create journey in `apps/web/e2e/todos.spec.ts` alongside the existing UJ-2 coverage unless a config constraint forces a split
-  - [ ] Reuse `apps/web/e2e/playwright.config.ts` and the existing `view-todos` Chromium project
-  - [ ] Reuse `apps/web/e2e/global-teardown.ts` for database pool cleanup
-  - [ ] Reuse `apps/web/e2e/helpers/db.ts` for setup only; do not use direct DB writes for the actual create action under test
-  - [ ] Leave `apps/web/e2e/error-state.spec.ts` and `apps/web/e2e/playwright.error.config.ts` unchanged unless test orchestration genuinely requires it
+- [x] Task 2: Reuse the existing E2E infrastructure rather than introducing parallel patterns (AC: 1, 4)
+  - [x] Keep the create journey in `apps/web/e2e/todos.spec.ts` alongside the existing UJ-2 coverage unless a config constraint forces a split
+  - [x] Reuse `apps/web/e2e/playwright.config.ts` and the existing `view-todos` Chromium project
+  - [x] Reuse `apps/web/e2e/global-teardown.ts` for database pool cleanup
+  - [x] Reuse `apps/web/e2e/helpers/db.ts` for setup only; do not use direct DB writes for the actual create action under test
+  - [x] Leave `apps/web/e2e/error-state.spec.ts` and `apps/web/e2e/playwright.error.config.ts` unchanged unless test orchestration genuinely requires it
 
-- [ ] Task 3: Validate the real create flow end-to-end against the current implementation (AC: 2, 3)
-  - [ ] Exercise the real `home` route, real RR action, real web server, real API, and real Postgres database
-  - [ ] Use stable locators already supported by the UI, such as the input placeholder, visible button text, empty-state copy, and section headings
-  - [ ] Prefer assertions that wait on the final user-visible state, not internal implementation details
-  - [ ] If a real defect is exposed in the create flow, apply the smallest product-code fix needed in the existing create path rather than adding test-only workarounds
+- [x] Task 3: Validate the real create flow end-to-end against the current implementation (AC: 2, 3)
+  - [x] Exercise the real `home` route, real RR action, real web server, real API, and real Postgres database
+  - [x] Use stable locators already supported by the UI, such as the input placeholder, visible button text, empty-state copy, and section headings
+  - [x] Prefer assertions that wait on the final user-visible state, not internal implementation details
+  - [x] If a real defect is exposed in the create flow, apply the smallest product-code fix needed in the existing create path rather than adding test-only workarounds
 
-- [ ] Task 4: Verify local and CI readiness (AC: 4)
-  - [ ] Run the focused Playwright suite for `apps/web/e2e/todos.spec.ts`
-  - [ ] Confirm the UJ-1 tests pass in Chromium with zero flakes in the local dev setup
-  - [ ] Ensure the story does not require new dependencies, new CI jobs, or alternative web servers
-  - [ ] Keep the create journey compatible with the current `apps/web/package.json` E2E scripts
+- [x] Task 4: Verify local and CI readiness (AC: 4)
+  - [x] Run the focused Playwright suite for `apps/web/e2e/todos.spec.ts`
+  - [x] Confirm the UJ-1 tests pass in Chromium with zero flakes in the local dev setup
+  - [x] Ensure the story does not require new dependencies, new CI jobs, or alternative web servers
+  - [x] Keep the create journey compatible with the current `apps/web/package.json` E2E scripts
 
 ---
 
@@ -265,7 +265,7 @@ Actionable takeaway: keep Story 2.7 narrowly focused on extending the existing E
 
 ## Story Completion Status
 
-**Status:** ready-for-dev  
+**Status:** done  
 **Context Prepared:** yes  
 **Checklist Outcome:** story context includes epic requirements, architecture constraints, previous-story learnings, repo-specific file paths, git intelligence, and implementation guardrails.
 
@@ -281,14 +281,47 @@ GPT-5.4
 
 ### Debug Log References
 
-- To be completed during implementation
+- Added UJ-1 create-journey coverage to `apps/web/e2e/todos.spec.ts`
+- Reused existing Playwright config, DB helper, and teardown infrastructure without changes
+- Verified the suite against the running Docker/Postgres + API + web stack
 
 ### Completion Notes List
 
-- Story context created automatically from BMAD workflow inputs on 2026-03-31
+- Added a real UJ-1 Playwright test covering first-use empty state, Enter-key submission, active-list visibility, empty-state removal, and persistence after reload
+- Hardened UJ-1 assertions to verify list-item rendering and section counts (`ACTIVE — 1`, `COMPLETED — 0`) to reduce false positives
+- Removed generated `apps/web/test-results/.last-run.json` from working changes to keep story-vs-git file tracking clean
+- Validated with `npx playwright test --config e2e/playwright.config.ts --reporter=line` (4/4 passing)
 - No `project-context.md` file was found in the workspace
-- External web research was not available; guidance is based on repository-pinned versions and current codebase state
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/2-7-playwright-e2e-create-todo-journey.md`
+- `apps/web/e2e/todos.spec.ts`
+
+### Change Log
+
+- 2026-04-01: Added UJ-1 Playwright coverage for creating a todo via Enter and verifying persistence after reload
+- 2026-04-02: Senior code review completed; tightened UJ-1 assertions and closed review findings
+
+## Senior Developer Review (AI)
+
+**Reviewer:** GitHub Copilot (GPT-5.3-Codex)  
+**Review Date:** 2026-04-02  
+**Review Outcome:** Approved
+
+### Findings
+
+1. **MEDIUM — Assertion specificity gap:** UJ-1 success checks were text-only (`getByText`) and did not verify list-item rendering strongly enough.  
+  **Fix:** Switched to list-item scoped locator (`li` with todo text), asserted single-item count and visibility.
+
+2. **MEDIUM — Persistence assertion scope:** Post-reload assertion did not re-validate section-level state.  
+  **Fix:** Added explicit post-reload `ACTIVE — 1` assertion and list-item count checks.
+
+3. **MEDIUM — Git/story hygiene discrepancy:** Generated Playwright `test-results/.last-run.json` appeared in git changes but was not part of the intended story scope.  
+  **Fix:** Restored generated file to remove unintended artifact from review scope.
+
+### Review Follow-ups (AI)
+
+- [x] [AI-Review][MEDIUM] Use list-item scoped assertions in UJ-1 create test
+- [x] [AI-Review][MEDIUM] Re-assert section-level state after reload for persistence proof
+- [x] [AI-Review][MEDIUM] Remove generated Playwright artifact from working tree changes

@@ -58,7 +58,7 @@ development_status:
   2-4-reorganise-api-feature-directory-structure: done
   2-5-post-todos-api-endpoint: done
   2-6-create-todo-taskinput-component-and-action: done
-  2-7-playwright-e2e-create-todo-journey: ready-for-dev
+  2-7-playwright-e2e-create-todo-journey: done
   2-8-loading-and-error-states: backlog
   epic-2-retrospective: optional
 

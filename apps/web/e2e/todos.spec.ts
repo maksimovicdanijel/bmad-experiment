@@ -3,6 +3,61 @@ import { truncateTodos, seedTodos, TEST_TODOS } from './helpers/db';
 
 const API_BASE_URL = 'http://localhost:3000';
 
+test.describe('UJ-1: Create Todo', () => {
+  test.beforeEach(async () => {
+    await truncateTodos();
+  });
+
+  test('creates a todo via Enter from first-use state and persists after reload', async ({
+    page,
+  }) => {
+    const todoText = 'Buy milk';
+
+    await page.goto('/');
+
+    await expect(
+      page.getByRole('heading', { name: 'Nothing here yet.' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText('Type above to capture your first task.'),
+    ).toBeVisible();
+
+    const input = page.getByPlaceholder('Add a task...');
+    await input.fill(todoText);
+    await input.press('Enter');
+
+    const createdTodoItem = page.locator('li').filter({ hasText: todoText });
+
+    await expect(createdTodoItem).toHaveCount(1);
+    await expect(createdTodoItem).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: 'ACTIVE — 1',
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: 'COMPLETED — 0',
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Nothing here yet.' }),
+    ).not.toBeVisible();
+    await expect(
+      page.getByText('Type above to capture your first task.'),
+    ).not.toBeVisible();
+
+    await page.reload();
+    await expect(createdTodoItem).toHaveCount(1);
+    await expect(createdTodoItem).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: 'ACTIVE — 1',
+      }),
+    ).toBeVisible();
+  });
+});
+
 test.describe('UJ-2: View Todos', () => {
   test.beforeEach(async () => {
     await truncateTodos();
