@@ -53,4 +53,11 @@ export default [
       'no-console': 'off',
     },
   },
+  // CLI scripts — allow console output
+  {
+    files: ['**/scripts/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
 ];

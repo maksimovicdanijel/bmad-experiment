@@ -59,20 +59,13 @@ development_status:
   2-5-post-todos-api-endpoint: done
   2-6-create-todo-taskinput-component-and-action: done
   2-7-playwright-e2e-create-todo-journey: done
-  2-8-loading-and-error-states: backlog
+  2-8-loading-and-error-states: done
   epic-2-retrospective: optional
 
   # ─── Epic 3: Manage Todo Lifecycle ─────────────────────────────────────────
-  epic-3: backlog
-  3-1-patch-todos-id-api-endpoint: backlog
-  3-2-delete-todos-id-api-endpoint: backlog
-  3-3-taskitem-component-complete-and-delete-actions: backlog
-  3-4-playwright-e2e-full-user-journey-coverage: backlog
+  epic-3: done
+  3-1-patch-todos-id-api-endpoint: done
+  3-2-delete-todos-id-api-endpoint: done
+  3-3-taskitem-component-complete-and-delete-actions: done
+  3-4-accessibility-audit-lighthouse-wcag-aa-compatibility: done
   epic-3-retrospective: optional
-
-  # ─── Epic 4: CI/CD Pipeline & Production Deployment ────────────────────────
-  epic-4: backlog
-  4-1-github-actions-ci-pipeline: backlog
-  4-2-reusable-deploy-workflow-and-staging-pipeline: backlog
-  4-3-changesets-versioning-and-production-pipeline: backlog
-  epic-4-retrospective: optional

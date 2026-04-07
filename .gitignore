@@ -17,6 +17,10 @@ build
 # Coverage
 coverage
 
+# Lighthouse reports
+apps/web/lighthouse-reports/*.json
+apps/web/lighthouse-reports/*.html
+
 # OS
 .DS_Store
 

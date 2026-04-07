@@ -3,7 +3,7 @@ export const charcoalFocusTokens = {
     charcoal: {
       50: { value: '#f5f7fa' },
       100: { value: '#e4e9f0' },
-      400: { value: '#6f7a8c' },
+      400: { value: '#7a8594' },
       600: { value: '#3d4654' },
       700: { value: '#2b313d' },
       800: { value: '#1d2129' },

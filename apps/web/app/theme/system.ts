@@ -21,14 +21,51 @@ const customConfig = defineConfig({
     tokens: charcoalFocusTokens,
     semanticTokens: {
       colors: {
-        'bg.canvas': { value: '{colors.charcoal.950}' },
-        'bg.panel': { value: '{colors.charcoal.900}' },
-        'fg.default': { value: '{colors.charcoal.50}' },
-        'fg.muted': { value: '{colors.charcoal.100}' },
-        'border.subtle': { value: '{colors.charcoal.700}' },
-        'accent.emphasis': { value: '{colors.cyan.400}' },
-        'status.success': { value: '{colors.green.400}' },
-        'status.error': { value: '{colors.red.400}' },
+        'bg.canvas': {
+          value: {
+            base: '{colors.charcoal.950}',
+            _dark: '{colors.charcoal.950}',
+          },
+        },
+        'bg.panel': {
+          value: {
+            base: '{colors.charcoal.900}',
+            _dark: '{colors.charcoal.900}',
+          },
+        },
+        'fg.default': {
+          value: {
+            base: '{colors.charcoal.50}',
+            _dark: '{colors.charcoal.50}',
+          },
+        },
+        'fg.muted': {
+          value: {
+            base: '{colors.charcoal.100}',
+            _dark: '{colors.charcoal.100}',
+          },
+        },
+        'fg.completed': {
+          value: {
+            base: '{colors.charcoal.400}',
+            _dark: '{colors.charcoal.400}',
+          },
+        },
+        'border.subtle': {
+          value: {
+            base: '{colors.charcoal.700}',
+            _dark: '{colors.charcoal.700}',
+          },
+        },
+        'accent.emphasis': {
+          value: { base: '{colors.cyan.400}', _dark: '{colors.cyan.400}' },
+        },
+        'status.success': {
+          value: { base: '{colors.green.400}', _dark: '{colors.green.400}' },
+        },
+        'status.error': {
+          value: { base: '{colors.red.400}', _dark: '{colors.red.400}' },
+        },
       },
     },
   },

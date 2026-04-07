@@ -70,6 +70,7 @@ export function TaskInput({
           aria-label="Task text"
           aria-invalid={resolvedError ? 'true' : 'false'}
           flex="1"
+          h="44px"
         />
         <Button
           type="submit"
@@ -79,9 +80,36 @@ export function TaskInput({
           px="4"
           loading={isSubmitting}
           data-touch-target="44"
+          css={
+            isSubmitting
+              ? {
+                  '& [data-part="spinner"]': {
+                    opacity: 0,
+                    animation: 'showSpinner 0s ease-in 200ms forwards',
+                  },
+                  '@keyframes showSpinner': {
+                    from: { opacity: 0 },
+                    to: { opacity: 1 },
+                  },
+                }
+              : undefined
+          }
         >
           Add
         </Button>
+        {isSubmitting && (
+          <span
+            data-testid="loading-delay-wrapper"
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              width: 0,
+              height: 0,
+              overflow: 'hidden',
+              animationDelay: '200ms',
+            }}
+          />
+        )}
       </form>
 
       {resolvedError && (

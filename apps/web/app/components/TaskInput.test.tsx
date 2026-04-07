@@ -137,4 +137,33 @@ describe('TaskInput', () => {
 
     expect(onErrorClear).not.toHaveBeenCalled();
   });
+
+  it('shows loading state on the Add button when isSubmitting is true', () => {
+    const onSubmit = vi.fn();
+
+    renderWithProviders(<TaskInput onSubmit={onSubmit} isSubmitting={true} />);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-loading');
+  });
+
+  it('applies CSS animation-delay of 200ms for the loading indicator', () => {
+    const onSubmit = vi.fn();
+
+    renderWithProviders(<TaskInput onSubmit={onSubmit} isSubmitting={true} />);
+
+    const loadingIndicator = screen.getByTestId('loading-delay-wrapper');
+    expect(loadingIndicator).toBeInTheDocument();
+    expect(loadingIndicator.style.animationDelay).toBe('200ms');
+  });
+
+  it('does not show loading indicator when isSubmitting is false', () => {
+    const onSubmit = vi.fn();
+
+    renderWithProviders(<TaskInput onSubmit={onSubmit} isSubmitting={false} />);
+
+    expect(
+      screen.queryByTestId('loading-delay-wrapper'),
+    ).not.toBeInTheDocument();
+  });
 });

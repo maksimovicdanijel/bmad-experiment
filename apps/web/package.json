@@ -12,7 +12,12 @@
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "test:e2e:error": "playwright test --config e2e/playwright.error.config.ts",
     "test:e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
-    "test:e2e:list": "playwright test --list --config e2e/playwright.config.ts"
+    "test:e2e:list": "playwright test --list --config e2e/playwright.config.ts",
+    "lighthouse:desktop": "tsx scripts/run-lighthouse.ts --preset=desktop",
+    "lighthouse:mobile": "tsx scripts/run-lighthouse.ts --preset=mobile",
+    "lighthouse": "npm run lighthouse:desktop && npm run lighthouse:mobile",
+    "lighthouse:assert": "tsx scripts/assert-lighthouse-scores.ts",
+    "lighthouse:audit": "npm run lighthouse && npm run lighthouse:assert"
   },
   "dependencies": {
     "@bmad/shared": "*",
@@ -37,7 +42,9 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "chrome-launcher": "^1.2.1",
     "jsdom": "^28.1.0",
+    "lighthouse": "^13.1.0",
     "pg": "^8.20.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",

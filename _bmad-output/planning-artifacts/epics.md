@@ -117,16 +117,9 @@ Users can open the application, immediately see a focused task input field, type
 
 ### Epic 3: Manage Todo Lifecycle
 
-Users can mark any todo as complete (immediate strikethrough + dimmed styling via optimistic UI), reactivate a completed todo if they change their mind, and permanently delete any todo — all with automatic revert and inline error messaging on failure. The full PATCH and DELETE endpoints are live and contract-tested. E2E tests cover all 6 user journeys end-to-end.
+Users can mark any todo as complete (immediate strikethrough + dimmed styling via optimistic UI), reactivate a completed todo if they change their mind, and permanently delete any todo — all with automatic revert and inline error messaging on failure. The full PATCH and DELETE endpoints are live and contract-tested. Accessibility is verified with Lighthouse and WCAG 2.1 AA checks.
 **FRs covered:** FR-3, FR-4, FR-5
 **NFRs covered:** NFR-3, NFR-4, NFR-5, NFR-9
-
-### Epic 4: CI/CD Pipeline & Production Deployment
-
-The GitHub Actions CI pipeline (lint → unit tests → contract tests → build → Playwright E2E) runs on every branch and PR. Reusable deploy workflows push to staging on every merge to `main` and to production on Changesets-generated version tags. Neon staging and production branches are provisioned, Fly.io staging and production apps are live, and `DATABASE_URL` secrets are configured. The full staging → production promotion flow is verified end-to-end.
-**FRs covered:** None directly (makes all FRs production-accessible)
-**NFRs covered:** NFR-10 (deploy in single command)
-**ARCH covered:** ARCH-15, ARCH-16, ARCH-17
 
 ---
 
@@ -627,7 +620,7 @@ So that I always know the app is working and can recover from failures without a
 
 ## Epic 3: Manage Todo Lifecycle
 
-Users can mark any todo as complete (with immediate strikethrough + dimmed styling via optimistic UI), reactivate a completed todo if they change their mind, and permanently delete any todo — all with automatic revert and inline error messaging on failure. The full PATCH and DELETE endpoints are live and contract-tested. E2E tests cover all 6 user journeys end-to-end.
+Users can mark any todo as complete (with immediate strikethrough + dimmed styling via optimistic UI), reactivate a completed todo if they change their mind, and permanently delete any todo — all with automatic revert and inline error messaging on failure. The full PATCH and DELETE endpoints are live and contract-tested. Accessibility is verified with Lighthouse and WCAG 2.1 AA checks.
 
 ### Story 3.1: PATCH /todos/:id API Endpoint
 
@@ -741,142 +734,30 @@ So that managing my task lifecycle feels as fast and reliable as creating tasks.
 **When** the code is reviewed,
 **Then** no hardcoded hex values, font sizes, or spacing values appear — completed state uses Chakra `textDecoration` and `opacity` tokens only
 
-### Story 3.4: Playwright E2E — Full User Journey Coverage
+### Story 3.4: Accessibility Audit — Lighthouse WCAG AA Compatibility
 
 As a **developer**,
-I want Playwright E2E tests covering UJ-3 (complete a task), UJ-4 (delete a task), UJ-5 (error recovery), and UJ-6 (reactivate a completed task),
-So that all 6 user journeys defined in the PRD are covered by automated end-to-end tests running in CI.
+I want an accessibility verification story using Lighthouse plus targeted manual checks,
+So that the Todo app meets WCAG 2.1 AA requirements before release.
 
 **Acceptance Criteria:**
 
-**Given** E2E test stubs for UJ-3 through UJ-6 are written in `todos.spec.ts` before full wiring is verified (TDD),
-**When** the tests are run against an incomplete implementation,
-**Then** they fail for the right reason
+**Given** the app is running with representative todo data,
+**When** Lighthouse is run against the main todo page in desktop and mobile profiles,
+**Then** the Accessibility category reports no critical accessibility failures and the score is captured in the story notes
 
-**Given** a todo exists and the user clicks its checkbox,
-**When** the Playwright UJ-3 test runs,
-**Then** the test asserts strikethrough styling appears immediately, and the completed state persists after page reload
+**Given** Lighthouse reports issues related to labels, names, roles, contrast, focus visibility, or semantic structure,
+**When** those issues are addressed,
+**Then** a follow-up Lighthouse run confirms the issues are resolved
 
-**Given** a todo exists and the user clicks its delete button,
-**When** the Playwright UJ-4 test runs,
-**Then** the test asserts the todo is removed from the list immediately, and is absent after page reload
+**Given** NFR-8 requires WCAG 2.1 AA contrast compliance,
+**When** key UI states are reviewed (default, hover, focus, completed, error, empty state),
+**Then** all text/background pairs meet at least 4.5:1 contrast ratio for normal text
 
-**Given** a completed todo exists and the user clicks its checkbox again,
-**When** the Playwright UJ-6 test runs,
-**Then** the test asserts active styling is restored immediately, and the active state persists after page reload
+**Given** keyboard-only navigation is used,
+**When** tabbing through input, add button, task checkbox, and delete button,
+**Then** focus order is logical, focus is visible, and all interactive controls are operable without a mouse
 
-**Given** a simulated network failure occurs during a mutation,
-**When** the Playwright UJ-5 test runs,
-**Then** the test asserts `ErrorBar` renders with an actionable message, the app does not fully reload, and the retry action succeeds when the network is restored
-
-**Given** the complete E2E suite (all 6 journeys) runs in CI,
-**When** the GitHub Actions `ci.yml` workflow executes,
-**Then** all tests pass in Chromium against both containerised apps with zero flakes, achieving ≥ 80% overall test coverage (NFR-9)
-
----
-
-## Epic 4: CI/CD Pipeline & Production Deployment
-
-### Story 4.1: GitHub Actions CI Pipeline
-
-As a **developer**,
-I want a `ci.yml` GitHub Actions workflow that runs lint, unit tests, contract tests, build, and Playwright E2E on every branch push and pull request,
-So that every code change is automatically validated before it can be merged.
-
-**Acceptance Criteria:**
-
-**Given** `.github/workflows/ci.yml` exists and is triggered on `push` to all branches and `pull_request`,
-**When** a commit is pushed,
-**Then** the workflow starts automatically
-
-**Given** the CI workflow runs,
-**When** the lint step executes,
-**Then** `npm run lint` exits 0 for both `apps/web` and `apps/api`
-
-**Given** the CI workflow runs,
-**When** the unit test step executes,
-**Then** `npm run test -w apps/api` runs all Vitest unit and service tests and exits 0
-
-**Given** the CI workflow runs,
-**When** the contract test step executes,
-**Then** `todos.routes.test.ts` runs via `@fastify/inject` and all assertions pass
-
-**Given** the CI workflow runs,
-**When** the build step executes,
-**Then** `npm run build` succeeds for both `apps/web` and `apps/api` with no TypeScript errors
-
-**Given** the CI workflow runs,
-**When** the Playwright E2E step executes,
-**Then** `docker compose up --build` starts both app containers and the Postgres container, all 6 user journey tests pass in Chromium, and containers are torn down after
-
-**Given** any single step in the CI workflow fails,
-**When** the failure occurs,
-**Then** subsequent steps do not run (fail-fast), and the PR/branch is marked as failing
-
-**Given** the Playwright E2E step fails,
-**When** the workflow completes,
-**Then** Playwright test artifacts (trace, screenshots) are uploaded as GitHub Actions artifacts for debugging
-
-### Story 4.2: Reusable Deploy Workflow & Staging Pipeline
-
-As a **developer**,
-I want a reusable `deploy.yml` workflow and a `staging.yml` workflow that automatically deploys to staging on every push to `main`,
-So that the latest code on `main` is always running in a staging environment for validation.
-
-**Acceptance Criteria:**
-
-**Given** `.github/workflows/deploy.yml` exists with `on: workflow_call`,
-**When** its inputs are inspected,
-**Then** it accepts `web_app` (string, required) and `api_app` (string, required) inputs, and `FLY_API_TOKEN` and `DATABASE_URL` secrets
-
-**Given** the `deploy.yml` workflow is called,
-**When** it runs,
-**Then** the steps execute in order: (1) `flyctl secrets set DATABASE_URL` on the API app, (2) `drizzle-kit migrate` against the target Neon branch, (3) `flyctl deploy` for `apps/api`, (4) `flyctl deploy` for `apps/web`
-
-**Given** `.github/workflows/staging.yml` exists,
-**When** its trigger is inspected,
-**Then** it fires on `push: branches: [main]` and calls `deploy.yml` passing `FLY_WEB_STAGING_APP`, `FLY_API_STAGING_APP`, `FLY_API_TOKEN`, and `DATABASE_URL_STAGING` from GitHub secrets
-
-**Given** GitHub secrets `FLY_API_TOKEN`, `FLY_WEB_STAGING_APP`, `FLY_API_STAGING_APP`, and `DATABASE_URL_STAGING` are configured in the repository,
-**When** a commit is pushed to `main`,
-**Then** the staging deploy workflow runs without secret-not-found errors
-
-**Given** staging Fly.io apps (`bmad-experiment-web-staging`, `bmad-experiment-api-staging`) and a Neon staging branch are provisioned,
-**When** the staging pipeline completes,
-**Then** the staging API is reachable at its Fly.io URL and returns `{ data: [] }` from `GET /todos`
-
-**Given** a code change is merged to `main`,
-**When** the staging pipeline finishes,
-**Then** the deployed staging build reflects the merged change
-
-### Story 4.3: Changesets Versioning & Production Pipeline
-
-As a **developer**,
-I want Changesets configured and a `production.yml` workflow that deploys to production when a version tag is pushed,
-So that production releases are gated behind an explicit versioning decision and the full staging → production promotion flow is documented and verified.
-
-**Acceptance Criteria:**
-
-**Given** `.changeset/config.json` is initialised in the repository root,
-**When** the config is inspected,
-**Then** it references the correct package(s) and the Changesets GitHub bot is configured
-
-**Given** a feature branch containing a `.changeset/*.md` file is merged to `main`,
-**When** the merge happens,
-**Then** the Changesets GitHub bot opens (or updates) a "Version Packages" PR that bumps the relevant package versions and updates changelogs
-
-**Given** `.github/workflows/production.yml` exists,
-**When** its trigger is inspected,
-**Then** it fires on `push: tags: ["v*"]` and calls `deploy.yml` passing `FLY_WEB_PRODUCTION_APP`, `FLY_API_PRODUCTION_APP`, `FLY_API_TOKEN`, and `DATABASE_URL_PRODUCTION` from GitHub secrets
-
-**Given** production Fly.io apps (`bmad-experiment-web`, `bmad-experiment-api`) and a Neon production branch are provisioned,
-**When** the production pipeline completes,
-**Then** the production API is reachable at its Fly.io URL and returns `{ data: [] }` from `GET /todos`
-
-**Given** GitHub secrets `FLY_WEB_PRODUCTION_APP`, `FLY_API_PRODUCTION_APP`, and `DATABASE_URL_PRODUCTION` are configured,
-**When** the production deploy runs,
-**Then** no secret-not-found errors occur and `flyctl deploy` exits 0 for both apps
-
-**Given** the complete promotion flow is exercised once manually: feature branch → merge to `main` → staging deploy succeeds → "Version Packages" PR merged → Changesets tag created → production deploy triggered,
-**When** the production pipeline finishes,
-**Then** the production environment runs the tagged release and the end-to-end promotion flow is verified working
+**Given** accessibility verification is complete,
+**When** evidence is recorded,
+**Then** the story includes Lighthouse output and a short WCAG AA checklist summary for auditability
